@@ -64,8 +64,8 @@ An AI-centric Markdown word processor built with Tauri and web technologies.
 - Node.js 18+ and npm
 - **Rust 1.85+ and Cargo** (Tauri 2 requirement)
 - Platform-specific dependencies:
-  - **Linux**: `webkit2gtk` and `rsvg2` (see [Tauri prerequisites](https://tauri.app/guides/prerequisites/#linux))
-  - **macOS**: Xcode Command Line Tools
+  - **Linux**: `webkit2gtk-4.1` and `librsvg2` (Arch: `webkit2gtk-4.1 librsvg`; Debian/Ubuntu: `libwebkit2gtk-4.1-dev librsvg2-dev`)
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
   - **Windows**: Microsoft Visual Studio C++ Build Tools
 
 **Note**: If you have Rust 1.83 or earlier, you may encounter build errors. Update Rust with:
@@ -79,6 +79,13 @@ npm install
 ```
 
 ### Run in Development Mode
+
+**Linux / macOS:**
+```bash
+npm run tauri dev
+```
+
+**Windows:**
 ```bash
 npm run tauri dev
 ```
@@ -86,9 +93,13 @@ npm run tauri dev
 The app will open with hot-reload enabled. Changes to frontend code will auto-refresh.
 
 ### Build for Production
+
+**Linux / macOS / Windows:**
 ```bash
 npm run tauri build
 ```
+
+Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces .msi and .exe.
 
 ## Project Structure
 
