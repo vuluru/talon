@@ -9,17 +9,15 @@ interface Settings {
 
 const SETTINGS_KEY = 'talon-settings';
 
+// Single source of truth for provider → default model mapping
+export const DEFAULT_MODELS: Record<AIProvider, string> = {
+  'xai': 'grok-4.6',
+  'openai': 'gpt-4.1',
+  'anthropic': 'claude-sonnet-4-6',
+};
+
 export function getDefaultModel(provider: AIProvider): string {
-  switch (provider) {
-    case 'xai':
-      return 'grok-4.6';
-    case 'openai':
-      return 'gpt-4.1';
-    case 'anthropic':
-      return 'claude-sonnet-4-6';
-    default:
-      return 'gpt-4.1';
-  }
+  return DEFAULT_MODELS[provider];
 }
 
 export function loadSettings(): Settings {
