@@ -14,6 +14,7 @@ class TalonApp {
   private aiPendingResult: { text: string; isWholeDocument: boolean; action: AIAction } | null = null;
   private aiRequestInFlight: boolean = false;
   private aiAbortController: AbortController | null = null;
+  private lastAnchorRect: DOMRect | null = null;
 
   constructor() {
     // Initialize components
@@ -56,6 +57,13 @@ class TalonApp {
         this.preview.update(content);
       }
       this.updateUI();
+    });
+
+    this.editor.onSelectionChange(() => {
+      // Reposition AI card if visible and not busy (idle result state)
+      if (this.isAICardVisible() && !this.aiRequestInFlight) {
+        this.positionAICard();
+      }
     });
 
     this.fileManager.onDirtyStateChange(() => {
@@ -390,11 +398,78 @@ class TalonApp {
   private positionAICard(): void {
     const card = document.getElementById('ai-card')!;
     
-    // Simple positioning: center of screen for now
-    // In production, you'd position near the actual cursor/selection
-    card.style.left = '50%';
-    card.style.top = '30%';
-    card.style.transform = 'translateX(-50%)';
+    // Get anchor rect (selection or caret)
+    let anchorRect = this.editor.getSelectionRect();
+    if (!anchorRect) {
+      anchorRect = this.editor.getCaretRect();
+    }
+    
+    if (!anchorRect) {
+      // Fallback: prefer last-known anchor, else editor pane top-left
+      if (this.lastAnchorRect) {
+        anchorRect = this.lastAnchorRect;
+      } else {
+        // Use editor container as anchor
+        const editorContainer = document.getElementById('editor-container');
+        if (editorContainer) {
+          const editorRect = editorContainer.getBoundingClientRect();
+          anchorRect = new DOMRect(editorRect.left, editorRect.top, 0, 0);
+        } else {
+          // Ultimate fallback: viewport top-left
+          anchorRect = new DOMRect(0, 0, 0, 0);
+        }
+      }
+    } else {
+      // Store successful anchor for future fallback
+      this.lastAnchorRect = anchorRect;
+    }
+
+    // Position card 8-12px below-right of anchor (using 10px as middle value)
+    const offset = 10;
+    let cardLeft = anchorRect.left + offset;
+    let cardTop = anchorRect.bottom + offset;
+
+    // Get card dimensions (need to temporarily show it to measure)
+    const wasVisible = card.style.display !== 'none';
+    if (!wasVisible) {
+      card.style.visibility = 'hidden';
+      card.style.display = 'block';
+    }
+    
+    const cardRect = card.getBoundingClientRect();
+    const cardWidth = cardRect.width;
+    const cardHeight = cardRect.height;
+    
+    if (!wasVisible) {
+      card.style.visibility = '';
+      card.style.display = 'none';
+    }
+
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Flip above if near bottom of viewport
+    if (cardTop + cardHeight > viewportHeight - 20) {
+      cardTop = anchorRect.top - cardHeight - offset;
+      // If still doesn't fit, clamp to viewport
+      if (cardTop < 20) {
+        cardTop = 20;
+      }
+    }
+
+    // Clamp horizontally to viewport
+    if (cardLeft + cardWidth > viewportWidth - 20) {
+      cardLeft = viewportWidth - cardWidth - 20;
+    }
+    if (cardLeft < 20) {
+      cardLeft = 20;
+    }
+
+    // Apply positioning
+    card.style.left = `${cardLeft}px`;
+    card.style.top = `${cardTop}px`;
+    card.style.transform = 'none';
   }
 
   private aiApply(): void {

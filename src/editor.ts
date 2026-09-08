@@ -8,6 +8,7 @@ import { history, historyKeymap } from '@codemirror/commands';
 export class Editor {
   private view: EditorView;
   private onChangeCallback?: (content: string) => void;
+  private onSelectionChangeCallback?: () => void;
 
   constructor(parent: HTMLElement) {
     const state = EditorState.create({
@@ -21,6 +22,9 @@ export class Editor {
         EditorView.updateListener.of((update) => {
           if (update.docChanged && this.onChangeCallback) {
             this.onChangeCallback(this.getContent());
+          }
+          if (update.selectionSet && this.onSelectionChangeCallback) {
+            this.onSelectionChangeCallback();
           }
         }),
         EditorView.theme({
@@ -105,7 +109,36 @@ export class Editor {
     this.onChangeCallback = callback;
   }
 
+  onSelectionChange(callback: () => void): void {
+    this.onSelectionChangeCallback = callback;
+  }
+
   focus(): void {
     this.view.focus();
+  }
+
+  getCaretRect(): DOMRect | null {
+    const pos = this.view.state.selection.main.head;
+    const coords = this.view.coordsAtPos(pos);
+    if (!coords) return null;
+    
+    return new DOMRect(coords.left, coords.top, 0, coords.bottom - coords.top);
+  }
+
+  getSelectionRect(): DOMRect | null {
+    const selection = this.view.state.selection.main;
+    if (selection.from === selection.to) return null;
+
+    const fromCoords = this.view.coordsAtPos(selection.from);
+    const toCoords = this.view.coordsAtPos(selection.to);
+    
+    if (!fromCoords || !toCoords) return null;
+
+    const left = Math.min(fromCoords.left, toCoords.left);
+    const right = Math.max(fromCoords.right, toCoords.right);
+    const top = Math.min(fromCoords.top, toCoords.top);
+    const bottom = Math.max(fromCoords.bottom, toCoords.bottom);
+
+    return new DOMRect(left, top, right - left, bottom - top);
   }
 }
