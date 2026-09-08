@@ -316,12 +316,14 @@ class TalonApp {
       };
       cardLabel.textContent = actionLabels[action];
 
-      // Update scope chip visibility
+      // Update scope chip visibility and text
       const scopeChip = document.getElementById('ai-scope-chip')!;
       if (isWholeDocument) {
+        scopeChip.textContent = 'Scope: whole document';
         scopeChip.style.display = 'inline-block';
       } else {
-        scopeChip.style.display = 'none';
+        scopeChip.textContent = 'Scope: selection';
+        scopeChip.style.display = 'inline-block';
       }
 
       // Position card near cursor
