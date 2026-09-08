@@ -11,38 +11,51 @@ An AI-centric Markdown word processor built with Tauri and web technologies.
 
 ## Features (v0 dogfood spike)
 
-### Editor Core
+### Chrome (Thin + Sparse)
+- Thin title bar (file name only)
+- Sparse footer (path · word count)
+- NO toolbar / ribbon / sidebar / chat
+- Edit-first: Markdown source is truth
+- Optional preview pane (hide with ⌘\)
+
+### File Operations
 - Open, Save, Save As file operations
-- Autosave (configurable interval, default 30s)
-- Recent files list
+- Dirty state tracking (• indicator)
+- Recent files list (localStorage persistence)
 - Markdown source editing (CodeMirror 6)
-- Optional preview pane (toggle or split, edit-first default)
 
-### AI Integration
-- BYO API key (stored locally, never committed)
-- **⌘J / Ctrl+J** to summon AI
-- Empty selection → processes whole document (with scope chip indicator)
-- Selection present → processes only selection
+### AI Integration (ADR-003)
+- BYO API key (stored locally)
+- **⌘J / Ctrl+J** to summon AI (ephemeral card, not docked)
+- Empty selection → paragraph + prior heading context
+- Selection present → processes selection only, Apply replaces in place
 - **Actions**:
-  - **Rewrite** (primary): Improve clarity and style
-  - **More** menu:
-    - Shorten
-    - Outline
-    - Extract → `## Decisions`
+  - **Rewrite for clarity** (default)
+  - **Extract → `## Decisions`** (appends at end of document)
 - **Apply (⏎)** / **Dismiss (Esc)** workflow
+- Single suggestion only (no carousel, no chat thread)
+- Never auto-apply
 - Mock responses available without API key
+- Missing key → soft Settings hint (not dead end)
 
-### Keyboard Shortcuts
-- **⌘J** / **Ctrl+J**: Summon AI (primary action)
-- **⏎**: Apply AI suggestion (when AI panel visible)
-- **Esc**: Dismiss AI panel
-- **⌘\\** / **Ctrl+\\**: Dismiss AI panel
+### Settings (BYO)
+- **Provider selection**: OpenAI / Anthropic / xAI
+- API key input
+- **"Stored only on this device"** (exact copy)
+- ⌘, opens Settings
+- Esc back to write
+- No account wall
+
+### Keyboard Shortcuts (Locked)
+- **⌘J** / **Ctrl+J**: Summon AI (ephemeral card)
+- **⏎**: Apply AI suggestion (when card visible)
+- **Esc**: Dismiss AI card
+- **⌘\\** / **Ctrl+\\**: Toggle preview
 - **⌘,** / **Ctrl+,**: Settings
 - **⌘N** / **Ctrl+N**: New file
 - **⌘O** / **Ctrl+O**: Open file
 - **⌘S** / **Ctrl+S**: Save
 - **⌘⇧S** / **Ctrl+Shift+S**: Save As
-- **⌘P** / **Ctrl+P**: Toggle preview
 
 ## Development
 
@@ -127,7 +140,21 @@ The key is "Stored only on this device" (browser localStorage) and never leaves 
 
 TipTap and Lexical were considered but lean toward WYSIWYG/prose editing, which conflicts with ADR-001.
 
-## AI Scope Behavior (ADR-003)
+No further Design pixels to wait on. Ready for dogfooding.
+
+## Design Pack (PM-Accepted for v0)
+
+The Design UX pack from Talon Design is **PM-accepted** and implemented. Not proposal — locked specification.
+
+### Locked Elements
+- **Keyboard**: ⌘J summon · ⏎ Apply · Esc Dismiss · ⌘\ toggle preview · ⌘, Settings (Ctrl on Win/Linux)
+- **Foot strip**: On for v0 (path · word count)
+- **Key storage**: Local device; UI copy "Stored only on this device" (mechanism: localStorage)
+- **Chrome budget**: Thin title + sparse footer (no toolbar/ribbon/sidebar/chat)
+- **AI card**: Ephemeral (near cursor), single suggestion, never auto-apply
+- **Context**: Selection → replace in place; No selection → paragraph + prior heading
+
+No further Design pixels to wait on. Ready for dogfooding.
 
 - **Empty selection**: Paragraph + prior heading context (stub OK)
 - **Selection present**: Selection-only mode, Apply replaces selection in place
