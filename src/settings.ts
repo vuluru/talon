@@ -39,7 +39,12 @@ export function loadSettings(): Settings {
 }
 
 export function saveSettings(settings: Settings): void {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  // Normalize: if model is empty, use provider default
+  const normalizedSettings = {
+    ...settings,
+    model: settings.model.trim() || getDefaultModel(settings.provider),
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(normalizedSettings));
 }
 
 export function getProvider(): AIProvider {
@@ -55,5 +60,7 @@ export function hasApiKey(): boolean {
 }
 
 export function getModel(): string {
-  return loadSettings().model;
+  const settings = loadSettings();
+  // Fallback: if stored model is empty, return provider default
+  return settings.model.trim() || getDefaultModel(settings.provider);
 }
