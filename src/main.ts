@@ -4,6 +4,7 @@ import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
 import { loadSettings, saveSettings, hasApiKey } from './settings';
 import { countWords } from './utils';
+import { Toast } from './toast';
 
 class TalonApp {
   private editor: Editor;
@@ -215,35 +216,29 @@ class TalonApp {
         this.updateUI();
       }
     } catch (error) {
-      alert('Failed to open file: ' + error);
+      Toast.error('Failed to open file: ' + (error as Error).message);
     }
   }
 
   private async saveFile(): Promise<void> {
     try {
       const success = await this.fileManager.saveFile(this.editor.getContent());
-      if (success) {
-        this.fileManager.setDirty(false);
-        this.updateUI();
-      } else {
-        alert('Failed to save file');
+      if (!success) {
+        Toast.error('Failed to save file');
       }
     } catch (error) {
-      alert('Failed to save file: ' + error);
+      Toast.error('Failed to save file: ' + (error as Error).message);
     }
   }
 
   private async saveFileAs(): Promise<void> {
     try {
       const success = await this.fileManager.saveFileAs(this.editor.getContent());
-      if (success) {
-        this.fileManager.setDirty(false);
-        this.updateUI();
-      } else {
-        alert('Failed to save file');
+      if (!success) {
+        Toast.error('Failed to save file');
       }
     } catch (error) {
-      alert('Failed to save file: ' + error);
+      Toast.error('Failed to save file: ' + (error as Error).message);
     }
   }
 
@@ -331,7 +326,7 @@ class TalonApp {
       
       this.showAICard();
     } catch (error) {
-      alert('AI processing failed: ' + error);
+      Toast.error('AI processing failed: ' + (error as Error).message);
     }
   }
 
