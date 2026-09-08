@@ -14,14 +14,14 @@ export class AIService {
     const provider = getProvider();
 
     if (!apiKey) {
-      // Return mock response
+      // Return mock response when no key
       return {
         text: this.generateMockResponse(text, action),
         isMock: true,
       };
     }
 
-    // Try to call real API if key is present
+    // Try to call real API with key present
     try {
       const endpoint = this.getEndpoint(provider);
       const payload = this.getPayload(provider, text, action);
@@ -36,26 +36,25 @@ export class AIService {
       });
 
       if (!response.ok) {
-        console.error('API error:', response.status);
-        return {
-          text: this.generateMockResponse(text, action),
-          isMock: true,
-        };
+        // Don't silently fall back to mock - throw error
+        const errorText = await response.text();
+        throw new Error(`API error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
       const resultText = this.extractResult(provider, data);
 
+      if (!resultText) {
+        throw new Error('Empty response from API');
+      }
+
       return {
-        text: resultText || text,
+        text: resultText,
         isMock: false,
       };
     } catch (error) {
-      console.error('Failed to call AI API:', error);
-      return {
-        text: this.generateMockResponse(text, action),
-        isMock: true,
-      };
+      // Re-throw error - don't silently fall back to mock
+      throw error;
     }
   }
 

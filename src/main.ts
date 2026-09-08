@@ -87,9 +87,7 @@ class TalonApp {
             break;
           case '\\':
             e.preventDefault();
-            if (this.preview.isVisible()) {
-              this.hidePreview();
-            }
+            this.togglePreview();
             break;
           case ',':
             e.preventDefault();
@@ -243,6 +241,11 @@ class TalonApp {
   }
 
   private hidePreview(): void {
+    this.preview.hide();
+    this.updateUI();
+  }
+
+  private togglePreview(): void {
     this.preview.toggle();
     this.updateUI();
   }
