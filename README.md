@@ -102,10 +102,12 @@ npm run tauri build
 ## Configuration
 
 ### API Key
-Set your OpenAI API key in Settings (⌘, / Ctrl+,). The key is stored in browser localStorage and never leaves your machine.
+Set your AI provider API key in Settings (⌘, / Ctrl+,). Choose from:
+- **OpenAI** (gpt-3.5-turbo)
+- **Anthropic** (claude-3-sonnet)
+- **xAI** (grok-beta)
 
-### Autosave Interval
-Configure autosave interval (default 30 seconds) in Settings.
+The key is "Stored only on this device" (browser localStorage) and never leaves your machine.
 
 ## Design Constraints (ADR-001)
 
@@ -113,6 +115,7 @@ Configure autosave interval (default 30 seconds) in Settings.
 - **Not WYSIWYG** — Markdown-honest source editing
 - AI must never block typing
 - Fast cold start (lean dependencies, minimal boot work)
+- **Thin chrome budget** — title + editor + sparse footer (no toolbar/ribbon/sidebar/chat)
 
 ## Editor Library Decision (ADR-002 proposal)
 
@@ -126,9 +129,10 @@ TipTap and Lexical were considered but lean toward WYSIWYG/prose editing, which 
 
 ## AI Scope Behavior (ADR-003)
 
-- **Empty selection**: Whole document mode with "Whole document" scope chip
-- **Selection present**: Selection-only mode, Apply replaces selection
-- Foot strip always visible when AI is active
+- **Empty selection**: Paragraph + prior heading context (stub OK)
+- **Selection present**: Selection-only mode, Apply replaces selection in place
+- **Ephemeral card**: Floats near cursor (not docked footer)
+- **Single suggestion**: No carousel, no chat thread, never auto-apply
 
 ## License
 
