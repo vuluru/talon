@@ -6,9 +6,7 @@ pkgdesc="AI-centric Markdown word processor"
 arch=('x86_64')
 url="https://github.com/vuluru/talon"
 license=('custom')
-depends=('webkit2gtk-4.1' 'gtk3' 'cairo' 'libayatana-appindicator')
-provides=('talon')
-conflicts=('talon')
+depends=('webkit2gtk-4.1' 'gtk3' 'cairo')
 source=("$pkgname-$pkgver::https://github.com/vuluru/talon/releases/download/v$pkgver/talon-$pkgver-linux-x86_64.tar.gz"
         "talon.desktop"
         "talon.png")

@@ -2,9 +2,10 @@
 
 This directory contains AUR (Arch User Repository) packaging files for Talon.
 
-## Package: talon-bin (Recommended)
+## Package: talon
 
-**Location**: `talon-bin/`
+**AUR package name**: `talon` (searchable as `talon` on AUR)  
+**Repo directory**: `talon-bin/` (binary-style PKGBUILD layout in this repo)
 
 Binary distribution package that does NOT require a Rust toolchain. This is the recommended installation method for end users.
 
@@ -15,11 +16,12 @@ Binary distribution package that does NOT require a Rust toolchain. This is the 
 
 ### Installation
 ```bash
-# Clone the AUR package (when published)
-git clone https://aur.archlinux.org/talon-bin.git
-cd talon-bin
+# AUR helper (e.g. yay, paru) — package name is talon
+yay -S talon
 
-# Build and install
+# Or manually (when published to AUR as talon)
+git clone https://aur.archlinux.org/talon.git
+cd talon
 makepkg -si
 ```
 
@@ -33,8 +35,9 @@ After installation:
 ## Package Details
 
 ### Naming
-- **Package name**: `talon` (AUR: `talon-bin`)
-- **Binary**: `/usr/bin/talon`
+- **AUR package name / search**: `talon`
+- **Repo packaging path**: `packaging/aur/talon-bin/` (binary-style layout)
+- **Binary**: `/usr/bin/talon` (via Cargo.toml `[[bin]] name = "talon"`)
 - **Desktop Name**: Talon
 - **Icon**: talon (installed to `/usr/share/pixmaps/talon.png`)
 
@@ -47,8 +50,7 @@ After installation:
 The package depends on:
 - `webkit2gtk-4.1` - WebKit rendering engine
 - `gtk3` - GTK+ 3 toolkit
-- `cairo` - 2D graphics library  
-- `libayatana-appindicator` - System tray support
+- `cairo` - 2D graphics library
 
 No Rust toolchain or build dependencies required for the binary package.
 
@@ -86,7 +88,9 @@ This packaging implementation satisfies ADR-004 requirements:
 
 ## Notes
 
-- The binary package (`talon-bin`) is the primary/recommended distribution method
+- **AUR search name**: `talon` (when published)
+- **Repo directory**: `talon-bin/` is the local packaging path (binary-style PKGBUILD)
 - Source URL pattern is prepared for GitHub releases (placeholder until first release is cut)
-- The Tauri binary is currently named `talon-app` in Cargo.toml but will be renamed to `talon` during build/packaging
+- Binary name is `talon` via Cargo.toml `[[bin]] name = "talon"` — installs to `/usr/bin/talon`
 - No second binary, no separate opener application
+- PKGBUILD sha256sums are `SKIP` (placeholders) until a tagged Linux release exists

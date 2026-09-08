@@ -105,21 +105,22 @@ Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces
 
 ### Arch Linux (AUR)
 
-Talon is available on the AUR as `talon-bin` (binary package, no build required):
+When published, install the AUR package **`talon`** (binary/prebuilt PKGBUILD under `packaging/aur/talon-bin/` — Arch `-bin` layout; searchable name is `talon`):
 
 ```bash
-# Using an AUR helper (e.g., yay, paru)
-yay -S talon-bin
+# AUR helper (e.g. yay, paru) — package name is talon
+yay -S talon
 
-# Or manually
-git clone https://aur.archlinux.org/talon-bin.git
-cd talon-bin
+# Or manually (after package is on AUR as talon)
+git clone https://aur.archlinux.org/talon.git
+cd talon
 makepkg -si
 ```
 
-After installation, launch from your application menu or run `talon` from the terminal.
+After install: app menu **Talon**, or `talon` in terminal.
 
-See `packaging/aur/README.md` for packaging details and release workflow.
+Scaffold only until a tagged Linux release exists (PKGBUILD sha256sums still SKIP / placeholder URL).
+See `packaging/aur/README.md`.
 
 ## Project Structure
 
