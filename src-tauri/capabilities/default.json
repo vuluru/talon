@@ -1,0 +1,14 @@
+{
+  "$schema": "https://tauri.app/schema/capabilities/1",
+  "identifier": "default",
+  "description": "Default permissions for Talon",
+  "windows": ["*"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:default"
+  ]
+}

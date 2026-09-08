@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Talon</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="title-bar">
+        <span id="file-name">untitled.md</span>
+      </div>
+      
+      <div id="main-container">
+        <div id="editor-container">
+          <div id="editor"></div>
+          <div id="editor-placeholder">Start writing Markdown… · ⌘J summon AI</div>
+        </div>
+        <div id="preview-container" style="display: none;">
+          <div id="preview-header">
+            <button id="hide-preview" title="Hide Preview (⌘\)">Hide ⌘\</button>
+          </div>
+          <div id="preview"></div>
+        </div>
+      </div>
+
+      <div id="ai-card" style="display: none;">
+        <div id="ai-card-header">
+          <span id="ai-scope-chip" style="display: none;">Scope: whole document</span>
+          <span id="ai-card-label">Rewrite for clarity</span>
+        </div>
+        <div id="ai-card-content"></div>
+        <div id="ai-card-actions">
+          <button id="ai-apply" title="Apply (Enter)">Apply ⏎</button>
+          <button id="ai-dismiss" title="Dismiss (Esc)">Dismiss Esc</button>
+          <div id="ai-more-container">
+            <button id="ai-more" title="More Actions">More ▾</button>
+            <div id="ai-more-menu" style="display: none;">
+              <button data-action="shorten">Shorten</button>
+              <button data-action="outline">Outline</button>
+              <button data-action="extract-decisions">Extract</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer">
+        <span id="footer-path">~/docs/untitled.md</span>
+        <span id="footer-word-count">0 words</span>
+      </div>
+
+      <div id="modal-backdrop" style="display: none;">
+        <div id="settings-modal" class="modal">
+          <h2>Settings</h2>
+          
+          <div class="settings-section">
+            <label class="settings-label">AI Provider</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="provider" value="openai" checked />
+                <span>OpenAI</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="provider" value="anthropic" />
+                <span>Anthropic</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="provider" value="xai" />
+                <span>xAI</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <label class="settings-label">API Key</label>
+            <input type="password" id="api-key-input" placeholder="sk-..." />
+            <div class="settings-hint">Stored only on this device</div>
+          </div>
+
+          <div class="modal-buttons">
+            <button id="save-settings">Save</button>
+            <button id="cancel-settings">Cancel</button>
+          </div>
+        </div>
+
+        <div id="recent-modal" class="modal">
+          <h2>Recent Files</h2>
+          <div id="recent-list"></div>
+          <div class="modal-buttons">
+            <button id="close-recent">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
