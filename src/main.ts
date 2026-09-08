@@ -3,7 +3,7 @@ import { FileManager } from './fileManager';
 import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
 import { loadSettings, saveSettings, hasApiKey } from './settings';
-import { countWords } from './utils';
+import { countWords, modKeyLabel } from './utils';
 import { Toast } from './toast';
 
 class TalonApp {
@@ -20,6 +20,9 @@ class TalonApp {
     this.preview = new Preview(document.getElementById('preview')!);
     this.aiService = new AIService();
 
+    // Setup platform-aware shortcuts
+    this.setupPlatformShortcuts();
+
     // Setup event handlers
     this.setupKeyboardShortcuts();
     this.setupEditor();
@@ -29,6 +32,15 @@ class TalonApp {
     // Focus editor
     this.editor.focus();
     this.updateUI();
+  }
+
+  private setupPlatformShortcuts(): void {
+    const modKey = modKeyLabel();
+    
+    // Update hide-preview button
+    const hidePreviewBtn = document.getElementById('hide-preview')!;
+    hidePreviewBtn.textContent = `Hide ${modKey}\\`;
+    hidePreviewBtn.title = `Hide Preview (${modKey}\\)`;
   }
 
   private setupEditor(): void {
