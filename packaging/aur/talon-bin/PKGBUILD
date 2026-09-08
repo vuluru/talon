@@ -1,0 +1,35 @@
+# Maintainer: Talon Team <https://github.com/vuluru/talon>
+pkgname=talon
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="AI-centric Markdown word processor"
+arch=('x86_64')
+url="https://github.com/vuluru/talon"
+license=('custom')
+depends=('webkit2gtk-4.1' 'gtk3' 'cairo' 'libayatana-appindicator')
+provides=('talon')
+conflicts=('talon')
+source=("$pkgname-$pkgver::https://github.com/vuluru/talon/releases/download/v$pkgver/talon-$pkgver-linux-x86_64.tar.gz"
+        "talon.desktop"
+        "talon.png")
+sha256sums=('SKIP'  # Update with actual release checksum
+            'SKIP'  # Generated from talon.desktop
+            'SKIP') # Generated from icon
+
+package() {
+    # Install binary (handle both talon and talon-app for compatibility)
+    if [ -f "$srcdir/talon" ]; then
+        install -Dm755 "$srcdir/talon" "$pkgdir/usr/bin/talon"
+    elif [ -f "$srcdir/talon-app" ]; then
+        install -Dm755 "$srcdir/talon-app" "$pkgdir/usr/bin/talon"
+    else
+        echo "Error: Binary not found"
+        return 1
+    fi
+    
+    # Install desktop file
+    install -Dm644 "$srcdir/talon.desktop" "$pkgdir/usr/share/applications/talon.desktop"
+    
+    # Install icon
+    install -Dm644 "$srcdir/talon.png" "$pkgdir/usr/share/pixmaps/talon.png"
+}

@@ -101,6 +101,26 @@ npm run tauri build
 
 Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces .msi and .exe.
 
+## Installation
+
+### Arch Linux (AUR)
+
+Talon is available on the AUR as `talon-bin` (binary package, no build required):
+
+```bash
+# Using an AUR helper (e.g., yay, paru)
+yay -S talon-bin
+
+# Or manually
+git clone https://aur.archlinux.org/talon-bin.git
+cd talon-bin
+makepkg -si
+```
+
+After installation, launch from your application menu or run `talon` from the terminal.
+
+See `packaging/aur/README.md` for packaging details and release workflow.
+
 ## Project Structure
 
 ```

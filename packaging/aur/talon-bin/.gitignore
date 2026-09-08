@@ -1,0 +1,6 @@
+# AUR packaging build artifacts
+src/
+pkg/
+*.tar.gz
+*.tar.xz
+*.pkg.tar.zst

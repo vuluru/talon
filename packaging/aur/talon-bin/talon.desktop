@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Talon
+Comment=AI-centric Markdown writer
+Exec=talon
+Icon=talon
+Terminal=false
+Categories=Office;TextEditor;
+StartupWMClass=Talon
