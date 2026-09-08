@@ -453,26 +453,6 @@ body {
   font-size: 13px;
 }
 
-/* Recent files */
-#recent-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.recent-item {
-  padding: 10px 12px;
-  margin-bottom: 4px;
-  background: #1e1e1e;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  font-family: 'Courier New', monospace;
-}
-
-.recent-item:hover {
-  background: #3c3c3c;
-}
-
 /* CodeMirror overrides */
 .cm-editor {
   height: 100%;

@@ -31,7 +31,6 @@ class TalonApp {
     this.setupKeyboardShortcuts();
     this.setupEditor();
     this.setupModals();
-    this.setupMenuCommands();
 
     // Focus editor
     this.editor.focus();
@@ -70,11 +69,6 @@ class TalonApp {
     this.fileManager.onDirtyStateChange(() => {
       this.updateUI();
     });
-  }
-
-  private setupMenuCommands(): void {
-    // File menu commands (via keyboard shortcuts)
-    // Settings handled in setupModals
   }
 
   private setupKeyboardShortcuts(): void {
@@ -153,10 +147,6 @@ class TalonApp {
     });
 
     document.getElementById('cancel-settings')?.addEventListener('click', () => {
-      this.hideModal();
-    });
-
-    document.getElementById('close-recent')?.addEventListener('click', () => {
       this.hideModal();
     });
 
