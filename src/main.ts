@@ -15,6 +15,7 @@ class TalonApp {
   private aiRequestInFlight: boolean = false;
   private aiAbortController: AbortController | null = null;
   private lastAnchorRect: DOMRect | null = null;
+  private aiComposeMode: boolean = false;
 
   constructor() {
     // Initialize components
@@ -80,11 +81,25 @@ class TalonApp {
     document.addEventListener('keydown', (e) => {
       // AI card keyboard shortcuts (when panel is visible)
       if (this.isAICardVisible()) {
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        // Handle Enter in compose mode
+        if (this.aiComposeMode && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+          // Check if focus is in the compose input
+          const composeInput = document.getElementById('ai-compose-input') as HTMLInputElement;
+          if (document.activeElement === composeInput) {
+            e.preventDefault();
+            this.aiComposeSubmit();
+            return;
+          }
+        }
+        
+        // Handle Enter for apply
+        if (!this.aiComposeMode && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
           e.preventDefault();
           this.aiApply();
           return;
         }
+        
+        // Handle Esc for dismiss
         if (e.key === 'Escape') {
           e.preventDefault();
           this.aiDismiss();
@@ -152,6 +167,10 @@ class TalonApp {
 
     document.getElementById('ai-dismiss')?.addEventListener('click', () => {
       this.aiDismiss();
+    });
+
+    document.getElementById('ai-compose')?.addEventListener('click', () => {
+      this.aiComposeSubmit();
     });
 
     // AI More menu
@@ -304,6 +323,16 @@ class TalonApp {
       return;
     }
 
+    const content = this.editor.getContent();
+    const isEmptyBuffer = content.trim().length === 0;
+
+    // Check for empty buffer → compose mode
+    if (isEmptyBuffer) {
+      this.showComposePrompt();
+      return;
+    }
+
+    // Non-empty buffer: existing rewrite/summon behavior
     const selection = this.editor.getSelection();
     
     let textToProcess: string;
@@ -333,6 +362,7 @@ class TalonApp {
       shorten: 'Working…',
       outline: 'Working…',
       'extract-decisions': 'Working…',
+      compose: 'Working…',
     };
 
     const cardLabel = document.getElementById('ai-card-label')!;
@@ -378,6 +408,7 @@ class TalonApp {
         shorten: 'Shorten',
         outline: 'Outline',
         'extract-decisions': 'Extract → ## Decisions',
+        compose: 'New draft',
       };
       cardLabel.textContent = resultLabels[action];
 
@@ -472,12 +503,126 @@ class TalonApp {
     card.style.transform = 'none';
   }
 
+  private showComposePrompt(): void {
+    this.aiComposeMode = true;
+
+    const cardLabel = document.getElementById('ai-card-label')!;
+    cardLabel.textContent = 'New draft';
+
+    const scopeChip = document.getElementById('ai-scope-chip')!;
+    scopeChip.textContent = 'Scope: Compose';
+    scopeChip.style.display = 'inline-block';
+
+    const promptContainer = document.getElementById('ai-card-prompt')!;
+    promptContainer.style.display = 'block';
+
+    const composeInput = document.getElementById('ai-compose-input') as HTMLInputElement;
+    composeInput.value = '';
+
+    const cardContent = document.getElementById('ai-card-content')!;
+    cardContent.style.display = 'none';
+
+    const composeBtn = document.getElementById('ai-compose') as HTMLButtonElement;
+    composeBtn.style.display = 'inline-block';
+    composeBtn.disabled = false;
+
+    const applyBtn = document.getElementById('ai-apply') as HTMLButtonElement;
+    applyBtn.style.display = 'none';
+
+    const moreBtn = document.getElementById('ai-more') as HTMLButtonElement;
+    moreBtn.style.display = 'none';
+
+    this.positionAICard();
+    this.showAICard();
+
+    // Focus the input
+    setTimeout(() => composeInput.focus(), 50);
+  }
+
+  private async aiComposeSubmit(): Promise<void> {
+    const composeInput = document.getElementById('ai-compose-input') as HTMLInputElement;
+    const prompt = composeInput.value.trim();
+
+    if (!prompt) {
+      return;
+    }
+
+    // Mark request in flight
+    this.aiRequestInFlight = true;
+    this.aiAbortController = new AbortController();
+
+    // Hide prompt input, show Working state
+    const promptContainer = document.getElementById('ai-card-prompt')!;
+    promptContainer.style.display = 'none';
+
+    const cardLabel = document.getElementById('ai-card-label')!;
+    cardLabel.textContent = 'Working…';
+
+    const cardContent = document.getElementById('ai-card-content')!;
+    cardContent.style.display = 'block';
+    cardContent.textContent = '';
+
+    // Disable compose button
+    const composeBtn = document.getElementById('ai-compose') as HTMLButtonElement;
+    composeBtn.disabled = true;
+
+    try {
+      const response = await this.aiService.composeFromPrompt(prompt, this.aiAbortController.signal);
+
+      // Check if aborted
+      if (this.aiAbortController.signal.aborted) {
+        return;
+      }
+
+      this.aiPendingResult = {
+        text: response.text,
+        isWholeDocument: true,
+        action: 'compose',
+      };
+
+      // Exit compose mode so Enter key routes to Apply
+      this.aiComposeMode = false;
+
+      // Update AI card with result
+      cardContent.textContent = response.text;
+      cardLabel.textContent = 'New draft';
+
+      // Show scope chip with prompt echo
+      const scopeChip = document.getElementById('ai-scope-chip')!;
+      scopeChip.textContent = `Scope: New draft`;
+      scopeChip.style.display = 'inline-block';
+
+      // Hide compose button, show apply button
+      composeBtn.style.display = 'none';
+      const applyBtn = document.getElementById('ai-apply') as HTMLButtonElement;
+      applyBtn.style.display = 'inline-block';
+      applyBtn.disabled = false;
+
+      // Keep More button hidden for compose drafts
+      const moreBtn = document.getElementById('ai-more') as HTMLButtonElement;
+      moreBtn.style.display = 'none';
+    } catch (error) {
+      // Only show error if not aborted
+      if (!this.aiAbortController?.signal.aborted) {
+        Toast.error('AI processing failed: ' + (error as Error).message);
+      }
+      this.hideAICard();
+      this.aiComposeMode = false;
+    } finally {
+      this.aiRequestInFlight = false;
+      this.aiAbortController = null;
+    }
+  }
+
   private aiApply(): void {
     if (!this.aiPendingResult) return;
 
     const { text, isWholeDocument, action } = this.aiPendingResult;
 
-    if (action === 'extract-decisions') {
+    if (action === 'compose') {
+      // Compose always sets the whole document (buffer was empty)
+      this.editor.setContent(text);
+    } else if (action === 'extract-decisions') {
       // Extract always appends to end of document
       const currentContent = this.editor.getContent();
       const newContent = currentContent.trim() + '\n\n' + text;
@@ -491,6 +636,7 @@ class TalonApp {
     }
 
     this.aiPendingResult = null;
+    this.aiComposeMode = false;
     this.hideAICard();
     this.updateUI();
   }
@@ -504,7 +650,24 @@ class TalonApp {
     
     this.aiRequestInFlight = false;
     this.aiPendingResult = null;
+    this.aiComposeMode = false;
     this.hideAICard();
+    
+    // Reset UI state
+    const promptContainer = document.getElementById('ai-card-prompt')!;
+    promptContainer.style.display = 'none';
+    
+    const cardContent = document.getElementById('ai-card-content')!;
+    cardContent.style.display = 'block';
+    
+    const composeBtn = document.getElementById('ai-compose') as HTMLButtonElement;
+    composeBtn.style.display = 'none';
+    
+    const applyBtn = document.getElementById('ai-apply') as HTMLButtonElement;
+    applyBtn.style.display = 'inline-block';
+    
+    const moreBtn = document.getElementById('ai-more') as HTMLButtonElement;
+    moreBtn.style.display = 'inline-block';
   }
 
   private showModal(modalId: string): void {

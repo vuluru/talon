@@ -6,9 +6,55 @@ export interface AIResponse {
   isMock: boolean;
 }
 
-export type AIAction = 'rewrite' | 'shorten' | 'outline' | 'extract-decisions';
+export type AIAction = 'rewrite' | 'shorten' | 'outline' | 'extract-decisions' | 'compose';
 
 export class AIService {
+  async composeFromPrompt(prompt: string, signal?: AbortSignal): Promise<AIResponse> {
+    const apiKey = getApiKey();
+    const provider = getProvider();
+
+    if (!apiKey) {
+      return {
+        text: this.generateMockCompose(prompt),
+        isMock: true,
+      };
+    }
+
+    try {
+      const endpoint = this.getEndpoint(provider);
+      const payload = this.getComposePayload(provider, prompt);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(payload),
+        signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const resultText = this.extractResult(provider, data);
+
+      if (!resultText) {
+        throw new Error('Empty response from API');
+      }
+
+      return {
+        text: resultText,
+        isMock: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async processText(text: string, action: AIAction = 'rewrite', signal?: AbortSignal): Promise<AIResponse> {
     const apiKey = getApiKey();
     const provider = getProvider();
@@ -107,6 +153,40 @@ export class AIService {
     }
   }
 
+  private getComposePayload(provider: AIProvider, prompt: string): any {
+    const systemPrompt = 'You are a helpful writing assistant. Generate a draft document based on the user\'s description. Write clear, well-structured markdown content. Return only the draft content, no meta-commentary.';
+    const userPrompt = `Write a draft document for: ${prompt}`;
+
+    switch (provider) {
+      case 'anthropic':
+        return {
+          model: 'claude-3-sonnet-20240229',
+          max_tokens: 2048,
+          messages: [
+            {
+              role: 'user',
+              content: `${systemPrompt}\n\n${userPrompt}`,
+            },
+          ],
+        };
+      default:
+        return {
+          model: provider === 'xai' ? 'grok-4.6' : 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt,
+            },
+            {
+              role: 'user',
+              content: userPrompt,
+            },
+          ],
+          temperature: 0.7,
+        };
+    }
+  }
+
   private extractResult(provider: AIProvider, data: any): string {
     switch (provider) {
       case 'anthropic':
@@ -159,5 +239,9 @@ export class AIService {
       default:
         return `[MOCK RESPONSE] ${text}`;
     }
+  }
+
+  private generateMockCompose(prompt: string): string {
+    return `# ${prompt.charAt(0).toUpperCase()}${prompt.slice(1)}\n\n[MOCK COMPOSE] This is a draft document based on your prompt: "${prompt}"\n\n## Introduction\n\nThis section introduces the topic.\n\n## Main Content\n\nHere is the main content of the draft.\n\n## Conclusion\n\nThis concludes the draft.`;
   }
 }
