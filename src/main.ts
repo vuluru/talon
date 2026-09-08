@@ -43,6 +43,10 @@ class TalonApp {
     const hidePreviewBtn = document.getElementById('hide-preview')!;
     hidePreviewBtn.textContent = `Hide ${modKey}\\`;
     hidePreviewBtn.title = `Hide Preview (${modKey}\\)`;
+    
+    // Update footer summon hint
+    const footerHint = document.getElementById('footer-summon-hint')!;
+    footerHint.textContent = `${modKey}+J`;
   }
 
   private setupEditor(): void {

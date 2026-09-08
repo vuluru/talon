@@ -266,7 +266,7 @@ body {
 /* Sparse footer */
 #footer {
   display: flex;
-  justify-content: space-between;
+  gap: 16px;
   padding: 6px 16px;
   background: #1e1e1e;
   border-top: 1px solid #333;
@@ -279,6 +279,11 @@ body {
 }
 
 #footer-word-count {
+  color: #666;
+  margin-left: auto;
+}
+
+#footer-summon-hint {
   color: #666;
 }
 
