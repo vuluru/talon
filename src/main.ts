@@ -2,7 +2,7 @@ import { Editor } from './editor';
 import { FileManager } from './fileManager';
 import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
-import { loadSettings, saveSettings, hasApiKey } from './settings';
+import { loadSettings, saveSettings, hasApiKey, getDefaultModel } from './settings';
 import { countWords, modKeyLabel } from './utils';
 import { Toast } from './toast';
 
@@ -137,12 +137,22 @@ class TalonApp {
   }
 
   private setupModals(): void {
-    // Settings modal
+    // Settings modal - provider change handler
+    document.querySelectorAll('input[name="provider"]').forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        const provider = (e.target as HTMLInputElement).value as any;
+        const modelInput = document.getElementById('model-input') as HTMLInputElement;
+        modelInput.value = getDefaultModel(provider);
+      });
+    });
+
+    // Settings modal - save handler
     document.getElementById('save-settings')?.addEventListener('click', () => {
       const provider = (document.querySelector('input[name="provider"]:checked') as HTMLInputElement).value as any;
+      const model = (document.getElementById('model-input') as HTMLInputElement).value.trim();
       const apiKey = (document.getElementById('api-key-input') as HTMLInputElement).value;
 
-      saveSettings({ provider, apiKey });
+      saveSettings({ provider, model, apiKey });
       this.hideModal();
     });
 
@@ -294,6 +304,9 @@ class TalonApp {
     if (providerRadio) {
       providerRadio.checked = true;
     }
+
+    // Set model
+    (document.getElementById('model-input') as HTMLInputElement).value = settings.model;
 
     // Set API key
     (document.getElementById('api-key-input') as HTMLInputElement).value = settings.apiKey;

@@ -1,4 +1,4 @@
-import { getProvider, getApiKey } from './settings';
+import { getProvider, getApiKey, getModel } from './settings';
 import type { AIProvider } from './settings';
 
 export interface AIResponse {
@@ -121,11 +121,12 @@ export class AIService {
   private getPayload(provider: AIProvider, text: string, action: AIAction): any {
     const systemPrompt = this.getSystemPrompt(action);
     const userPrompt = this.getUserPrompt(text, action);
+    const model = getModel();
 
     switch (provider) {
       case 'anthropic':
         return {
-          model: 'claude-3-sonnet-20240229',
+          model,
           max_tokens: 1024,
           messages: [
             {
@@ -137,7 +138,7 @@ export class AIService {
       default:
         // OpenAI and xAI use similar format
         return {
-          model: provider === 'xai' ? 'grok-4.6' : 'gpt-3.5-turbo',
+          model,
           messages: [
             {
               role: 'system',
@@ -156,11 +157,12 @@ export class AIService {
   private getComposePayload(provider: AIProvider, prompt: string): any {
     const systemPrompt = 'You are a helpful writing assistant. Generate a draft document based on the user\'s description. Write clear, well-structured markdown content. Return only the draft content, no meta-commentary.';
     const userPrompt = `Write a draft document for: ${prompt}`;
+    const model = getModel();
 
     switch (provider) {
       case 'anthropic':
         return {
-          model: 'claude-3-sonnet-20240229',
+          model,
           max_tokens: 2048,
           messages: [
             {
@@ -171,7 +173,7 @@ export class AIService {
         };
       default:
         return {
-          model: provider === 'xai' ? 'grok-4.6' : 'gpt-3.5-turbo',
+          model,
           messages: [
             {
               role: 'system',
