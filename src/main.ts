@@ -510,7 +510,7 @@ class TalonApp {
     cardLabel.textContent = 'New draft';
 
     const scopeChip = document.getElementById('ai-scope-chip')!;
-    scopeChip.textContent = 'Compose';
+    scopeChip.textContent = 'Scope: Compose';
     scopeChip.style.display = 'inline-block';
 
     const promptContainer = document.getElementById('ai-card-prompt')!;
