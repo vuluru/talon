@@ -158,11 +158,15 @@ The Design UX pack from Talon Design is **PM-accepted** and implemented. Not pro
 
 No further Design pixels to wait on. Ready for dogfooding.
 
-- **Empty selection**: Paragraph + prior heading context (stub OK)
-- **Selection present**: Selection-only mode, Apply replaces selection in place
-- **Ephemeral card**: Floats near cursor (not docked footer)
-- **Single suggestion**: No carousel, no chat thread, never auto-apply
 
 ## License
 
 Proprietary — Jason Hu is HIL for all merges.
+
+## AI Scope Behavior (ADR-003 Tightened)
+
+- **Empty selection**: Whole document + visible scope chip
+- **Selection present**: Selection-only mode, Apply replaces selection in place
+- **Ephemeral card**: Floats near cursor (not docked footer)
+- **Single suggestion**: No carousel, no chat thread, never auto-apply
+- **More control**: Secondary actions (Shorten / Outline / Extract) behind one More button
