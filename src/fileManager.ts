@@ -1,6 +1,5 @@
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { addRecentFile } from './recentFiles';
 
 export class FileManager {
   private currentFilePath: string | null = null;
@@ -13,9 +12,6 @@ export class FileManager {
 
   setCurrentFilePath(path: string | null): void {
     this.currentFilePath = path;
-    if (path) {
-      addRecentFile(path);
-    }
   }
 
   isDirtyState(): boolean {
@@ -55,7 +51,6 @@ export class FileManager {
     const content = await readTextFile(selected);
     this.currentFilePath = selected;
     this.isDirty = false;
-    addRecentFile(selected);
     return content;
   }
 
@@ -97,15 +92,10 @@ export class FileManager {
       await writeTextFile(path, content);
       this.currentFilePath = path;
       this.isDirty = false;
-      addRecentFile(path);
       return true;
     } catch (error) {
       console.error('Failed to save file:', error);
       return false;
     }
-  }
-
-  async readFile(path: string): Promise<string> {
-    return await readTextFile(path);
   }
 }
