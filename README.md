@@ -48,11 +48,16 @@ An AI-centric Markdown word processor built with Tauri and web technologies.
 
 ### Prerequisites
 - Node.js 18+ and npm
-- Rust and Cargo
+- **Rust 1.85+ and Cargo** (Tauri 2 requirement)
 - Platform-specific dependencies:
   - **Linux**: `webkit2gtk` and `rsvg2` (see [Tauri prerequisites](https://tauri.app/guides/prerequisites/#linux))
   - **macOS**: Xcode Command Line Tools
   - **Windows**: Microsoft Visual Studio C++ Build Tools
+
+**Note**: If you have Rust 1.83 or earlier, you may encounter build errors. Update Rust with:
+```bash
+rustup update stable
+```
 
 ### Install Dependencies
 ```bash
