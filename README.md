@@ -153,7 +153,8 @@ The Design UX pack from Talon Design is **PM-accepted** and implemented. Not pro
 - **Key storage**: Local device; UI copy "Stored only on this device" (mechanism: localStorage)
 - **Chrome budget**: Thin title + sparse footer (no toolbar/ribbon/sidebar/chat)
 - **AI card**: Ephemeral (near cursor), single suggestion, never auto-apply
-- **Context**: Selection → replace in place; No selection → paragraph + prior heading
+- **Context (ADR-003)**: Selection → replace in place; No selection → **whole document + scope chip**
+- **More control**: Shorten / Outline / Extract behind one More button (not carousel)
 
 No further Design pixels to wait on. Ready for dogfooding.
 
