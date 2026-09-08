@@ -580,6 +580,9 @@ class TalonApp {
         action: 'compose',
       };
 
+      // Exit compose mode so Enter key routes to Apply
+      this.aiComposeMode = false;
+
       // Update AI card with result
       cardContent.textContent = response.text;
       cardLabel.textContent = 'New draft';
