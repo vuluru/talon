@@ -38,8 +38,12 @@ export class FileManager {
       multiple: false,
       filters: [
         {
-          name: 'Markdown',
-          extensions: ['md', 'markdown', 'txt'],
+          name: 'Markdown (*.md)',
+          extensions: ['md'],
+        },
+        {
+          name: 'All files',
+          extensions: ['*'],
         },
       ],
     });
@@ -72,10 +76,15 @@ export class FileManager {
 
   async saveFileAs(content: string): Promise<boolean> {
     const path = await save({
+      defaultPath: 'untitled.md',
       filters: [
         {
-          name: 'Markdown',
-          extensions: ['md', 'markdown'],
+          name: 'Markdown (*.md)',
+          extensions: ['md'],
+        },
+        {
+          name: 'All files',
+          extensions: ['*'],
         },
       ],
     });
