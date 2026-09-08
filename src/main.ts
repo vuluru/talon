@@ -3,14 +3,14 @@ import { FileManager } from './fileManager';
 import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
 import { loadSettings, saveSettings, hasApiKey } from './settings';
-import { extractParagraphContext, countWords } from './utils';
+import { countWords } from './utils';
 
 class TalonApp {
   private editor: Editor;
   private fileManager: FileManager;
   private preview: Preview;
   private aiService: AIService;
-  private aiPendingResult: { text: string; isSelection: boolean } | null = null;
+  private aiPendingResult: { text: string; isWholeDocument: boolean; action: AIAction } | null = null;
 
   constructor() {
     // Initialize components
@@ -139,6 +139,30 @@ class TalonApp {
       this.aiDismiss();
     });
 
+    // AI More menu
+    document.getElementById('ai-more')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = document.getElementById('ai-more-menu')!;
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('#ai-more-menu button').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const action = (e.target as HTMLElement).dataset.action as AIAction;
+        await this.aiSummon(action);
+        document.getElementById('ai-more-menu')!.style.display = 'none';
+      });
+    });
+
+    // Close More menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('ai-more-menu')!;
+      const moreBtn = document.getElementById('ai-more')!;
+      if (!menu.contains(e.target as Node) && e.target !== moreBtn) {
+        menu.style.display = 'none';
+      }
+    });
+
     // Preview hide button
     document.getElementById('hide-preview')?.addEventListener('click', () => {
       this.hidePreview();
@@ -245,7 +269,7 @@ class TalonApp {
     this.showModal('settings-modal');
   }
 
-  private async aiSummon(action: AIAction): Promise<void> {
+  private async aiSummon(action: AIAction = 'rewrite'): Promise<void> {
     // Check if API key is missing
     if (!hasApiKey()) {
       this.showModal('missing-key-modal');
@@ -255,18 +279,16 @@ class TalonApp {
     const selection = this.editor.getSelection();
     
     let textToProcess: string;
-    let isSelection: boolean;
+    let isWholeDocument: boolean;
 
     if (selection) {
       // Selection mode
       textToProcess = selection.text;
-      isSelection = true;
+      isWholeDocument = false;
     } else {
-      // No selection: extract paragraph + prior heading
-      const content = this.editor.getContent();
-      const cursorPos = this.editor.getCursorPosition();
-      textToProcess = extractParagraphContext(content, cursorPos);
-      isSelection = false;
+      // No selection: whole document
+      textToProcess = this.editor.getContent();
+      isWholeDocument = true;
     }
 
     if (!textToProcess.trim()) {
@@ -277,7 +299,8 @@ class TalonApp {
       const response = await this.aiService.processText(textToProcess, action);
       this.aiPendingResult = {
         text: response.text,
-        isSelection,
+        isWholeDocument,
+        action,
       };
 
       // Update AI card
@@ -285,7 +308,21 @@ class TalonApp {
       cardContent.textContent = response.text;
       
       const cardLabel = document.getElementById('ai-card-label')!;
-      cardLabel.textContent = action === 'rewrite' ? 'Rewrite for clarity' : 'Extract → ## Decisions';
+      const actionLabels: Record<AIAction, string> = {
+        rewrite: 'Rewrite for clarity',
+        shorten: 'Shorten',
+        outline: 'Outline',
+        'extract-decisions': 'Extract → ## Decisions',
+      };
+      cardLabel.textContent = actionLabels[action];
+
+      // Update scope chip visibility
+      const scopeChip = document.getElementById('ai-scope-chip')!;
+      if (isWholeDocument) {
+        scopeChip.style.display = 'inline-block';
+      } else {
+        scopeChip.style.display = 'none';
+      }
 
       // Position card near cursor
       this.positionAICard();
@@ -309,24 +346,19 @@ class TalonApp {
   private aiApply(): void {
     if (!this.aiPendingResult) return;
 
-    const { text, isSelection } = this.aiPendingResult;
+    const { text, isWholeDocument, action } = this.aiPendingResult;
 
-    if (isSelection) {
+    if (action === 'extract-decisions') {
+      // Extract always appends to end of document
+      const currentContent = this.editor.getContent();
+      const newContent = currentContent.trim() + '\n\n' + text;
+      this.editor.setContent(newContent);
+    } else if (isWholeDocument) {
+      // Replace whole document
+      this.editor.setContent(text);
+    } else {
       // Replace selection
       this.editor.replaceSelection(text);
-    } else {
-      // For paragraph mode, replace the extracted context
-      // For Extract action, append to end of document
-      const action = document.getElementById('ai-card-label')!.textContent;
-      if (action?.includes('Extract')) {
-        // Append to end of document
-        const currentContent = this.editor.getContent();
-        const newContent = currentContent.trim() + '\n\n' + text;
-        this.editor.setContent(newContent);
-      } else {
-        // For now, just replace selection (stub OK per spec)
-        this.editor.replaceSelection(text);
-      }
     }
 
     this.aiPendingResult = null;

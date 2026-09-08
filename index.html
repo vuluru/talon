@@ -27,12 +27,21 @@
 
       <div id="ai-card" style="display: none;">
         <div id="ai-card-header">
+          <span id="ai-scope-chip" style="display: none;">Whole document</span>
           <span id="ai-card-label">Rewrite for clarity</span>
         </div>
         <div id="ai-card-content"></div>
         <div id="ai-card-actions">
           <button id="ai-apply" title="Apply (Enter)">Apply ⏎</button>
           <button id="ai-dismiss" title="Dismiss (Esc)">Dismiss Esc</button>
+          <div id="ai-more-container">
+            <button id="ai-more" title="More Actions">More ▾</button>
+            <div id="ai-more-menu" style="display: none;">
+              <button data-action="shorten">Shorten</button>
+              <button data-action="outline">Outline</button>
+              <button data-action="extract-decisions">Extract → ## Decisions</button>
+            </div>
+          </div>
         </div>
       </div>
 
