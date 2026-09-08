@@ -204,8 +204,13 @@ body {
   font-size: 13px;
 }
 
-#ai-card-actions button:hover {
+#ai-card-actions button:hover:not(:disabled) {
   background: #4a4a4a;
+}
+
+#ai-card-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 #ai-apply {
@@ -213,7 +218,7 @@ body {
   border-color: #0055aa;
 }
 
-#ai-apply:hover {
+#ai-apply:hover:not(:disabled) {
   background: #0055aa;
 }
 
