@@ -8,58 +8,67 @@
   </head>
   <body>
     <div id="app">
-      <div id="toolbar">
-        <button id="new-file" title="New File (Ctrl+N)">New</button>
-        <button id="open-file" title="Open File (Ctrl+O)">Open</button>
-        <button id="save-file" title="Save (Ctrl+S)">Save</button>
-        <button id="save-as-file" title="Save As (Ctrl+Shift+S)">Save As</button>
-        <button id="toggle-preview" title="Toggle Preview (Ctrl+P)">Toggle Preview</button>
-        <button id="recent-files" title="Recent Files">Recent</button>
-        <button id="ai-rewrite" title="AI Rewrite (Ctrl+J / ⌘J)">AI Rewrite</button>
-        <button id="settings" title="Settings (Ctrl+, / ⌘,)">Settings</button>
-        <span id="status"></span>
+      <div id="title-bar">
+        <span id="file-name">untitled.md</span>
       </div>
       
       <div id="main-container">
         <div id="editor-container">
           <div id="editor"></div>
+          <div id="editor-placeholder">Start writing Markdown… · ⌘J summon AI</div>
         </div>
         <div id="preview-container" style="display: none;">
+          <div id="preview-header">
+            <button id="hide-preview" title="Hide Preview (⌘\)">Hide ⌘\</button>
+          </div>
           <div id="preview"></div>
         </div>
       </div>
 
-      <div id="ai-panel" style="display: none;">
-        <div id="ai-header">
-          <span id="ai-scope-chip" style="display: none;"></span>
-          <span id="ai-action-label">Rewrite</span>
+      <div id="ai-card" style="display: none;">
+        <div id="ai-card-header">
+          <span id="ai-card-label">Rewrite for clarity</span>
         </div>
-        <div id="ai-content"></div>
-        <div id="ai-controls">
-          <button id="ai-apply" title="Apply (Enter)">Apply</button>
-          <button id="ai-dismiss" title="Dismiss (Esc)">Dismiss</button>
-          <div id="ai-more-container">
-            <button id="ai-more" title="More Actions">More ▾</button>
-            <div id="ai-more-menu" style="display: none;">
-              <button data-action="shorten">Shorten</button>
-              <button data-action="outline">Outline</button>
-              <button data-action="extract-decisions">Extract → ## Decisions</button>
-            </div>
-          </div>
+        <div id="ai-card-content"></div>
+        <div id="ai-card-actions">
+          <button id="ai-apply" title="Apply (Enter)">Apply ⏎</button>
+          <button id="ai-dismiss" title="Dismiss (Esc)">Dismiss Esc</button>
         </div>
+      </div>
+
+      <div id="footer">
+        <span id="footer-path">~/docs/untitled.md</span>
+        <span id="footer-word-count">0 words</span>
       </div>
 
       <div id="modal-backdrop" style="display: none;">
         <div id="settings-modal" class="modal">
           <h2>Settings</h2>
-          <label>
-            OpenAI API Key:
+          
+          <div class="settings-section">
+            <label class="settings-label">AI Provider</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="provider" value="openai" checked />
+                <span>OpenAI</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="provider" value="anthropic" />
+                <span>Anthropic</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="provider" value="xai" />
+                <span>xAI</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <label class="settings-label">API Key</label>
             <input type="password" id="api-key-input" placeholder="sk-..." />
-          </label>
-          <label>
-            Autosave Interval (seconds):
-            <input type="number" id="autosave-interval" value="30" min="5" />
-          </label>
+            <div class="settings-hint">Stored only on this device</div>
+          </div>
+
           <div class="modal-buttons">
             <button id="save-settings">Save</button>
             <button id="cancel-settings">Cancel</button>
@@ -71,6 +80,15 @@
           <div id="recent-list"></div>
           <div class="modal-buttons">
             <button id="close-recent">Close</button>
+          </div>
+        </div>
+
+        <div id="missing-key-modal" class="modal modal-hint">
+          <p>Add a provider key to summon AI</p>
+          <p class="hint-subtext">Keys stay on this device</p>
+          <div class="modal-buttons">
+            <button id="open-settings-from-hint">Open Settings</button>
+            <button id="close-hint">Close</button>
           </div>
         </div>
       </div>

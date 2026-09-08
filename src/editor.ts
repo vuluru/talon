@@ -86,6 +86,10 @@ export class Editor {
     };
   }
 
+  getCursorPosition(): number {
+    return this.view.state.selection.main.head;
+  }
+
   replaceSelection(text: string): void {
     const selection = this.view.state.selection.main;
     this.view.dispatch({

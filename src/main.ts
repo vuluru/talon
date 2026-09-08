@@ -2,17 +2,15 @@ import { Editor } from './editor';
 import { FileManager } from './fileManager';
 import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
-import { loadSettings, saveSettings } from './settings';
-import { getRecentFiles } from './recentFiles';
+import { loadSettings, saveSettings, hasApiKey } from './settings';
+import { extractParagraphContext, countWords } from './utils';
 
 class TalonApp {
   private editor: Editor;
   private fileManager: FileManager;
   private preview: Preview;
   private aiService: AIService;
-  private autosaveTimer: number | null = null;
-  private aiPendingRewrite: string | null = null;
-  private aiCurrentScope: 'selection' | 'document' = 'selection';
+  private aiPendingResult: { text: string; isSelection: boolean } | null = null;
 
   constructor() {
     // Initialize components
@@ -22,15 +20,14 @@ class TalonApp {
     this.aiService = new AIService();
 
     // Setup event handlers
-    this.setupToolbar();
     this.setupKeyboardShortcuts();
     this.setupEditor();
     this.setupModals();
-    this.startAutosave();
+    this.setupMenuCommands();
 
     // Focus editor
     this.editor.focus();
-    this.updateStatus();
+    this.updateUI();
   }
 
   private setupEditor(): void {
@@ -39,30 +36,23 @@ class TalonApp {
       if (this.preview.isVisible()) {
         this.preview.update(content);
       }
-      this.updateStatus();
-      this.updateAIButton();
+      this.updateUI();
     });
 
     this.fileManager.onDirtyStateChange(() => {
-      this.updateStatus();
+      this.updateUI();
     });
   }
 
-  private setupToolbar(): void {
-    document.getElementById('new-file')?.addEventListener('click', () => this.newFile());
-    document.getElementById('open-file')?.addEventListener('click', () => this.openFile());
-    document.getElementById('save-file')?.addEventListener('click', () => this.saveFile());
-    document.getElementById('save-as-file')?.addEventListener('click', () => this.saveFileAs());
-    document.getElementById('toggle-preview')?.addEventListener('click', () => this.togglePreview());
-    document.getElementById('recent-files')?.addEventListener('click', () => this.showRecentFiles());
-    document.getElementById('ai-rewrite')?.addEventListener('click', () => this.aiSummon());
-    document.getElementById('settings')?.addEventListener('click', () => this.showSettings());
+  private setupMenuCommands(): void {
+    // File menu commands (via keyboard shortcuts)
+    // Settings handled in setupModals
   }
 
   private setupKeyboardShortcuts(): void {
     document.addEventListener('keydown', (e) => {
-      // AI panel keyboard shortcuts (when panel is visible)
-      if (this.isAIPanelVisible()) {
+      // AI card keyboard shortcuts (when panel is visible)
+      if (this.isAICardVisible()) {
         if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
           e.preventDefault();
           this.aiApply();
@@ -80,7 +70,7 @@ class TalonApp {
         switch (e.key.toLowerCase()) {
           case 'j':
             e.preventDefault();
-            this.aiSummon();
+            this.aiSummon('rewrite');
             break;
           case 'n':
             e.preventDefault();
@@ -94,14 +84,10 @@ class TalonApp {
             e.preventDefault();
             this.saveFile();
             break;
-          case 'p':
-            e.preventDefault();
-            this.togglePreview();
-            break;
           case '\\':
             e.preventDefault();
-            if (this.isAIPanelVisible()) {
-              this.aiDismiss();
+            if (this.preview.isVisible()) {
+              this.hidePreview();
             }
             break;
           case ',':
@@ -119,14 +105,11 @@ class TalonApp {
   private setupModals(): void {
     // Settings modal
     document.getElementById('save-settings')?.addEventListener('click', () => {
+      const provider = (document.querySelector('input[name="provider"]:checked') as HTMLInputElement).value as any;
       const apiKey = (document.getElementById('api-key-input') as HTMLInputElement).value;
-      const autosaveInterval = parseInt(
-        (document.getElementById('autosave-interval') as HTMLInputElement).value
-      );
 
-      saveSettings({ apiKey, autosaveInterval });
+      saveSettings({ provider, apiKey });
       this.hideModal();
-      this.restartAutosave();
     });
 
     document.getElementById('cancel-settings')?.addEventListener('click', () => {
@@ -134,6 +117,16 @@ class TalonApp {
     });
 
     document.getElementById('close-recent')?.addEventListener('click', () => {
+      this.hideModal();
+    });
+
+    // Missing key hint modal
+    document.getElementById('open-settings-from-hint')?.addEventListener('click', () => {
+      this.hideModal();
+      this.showSettings();
+    });
+
+    document.getElementById('close-hint')?.addEventListener('click', () => {
       this.hideModal();
     });
 
@@ -146,33 +139,21 @@ class TalonApp {
       this.aiDismiss();
     });
 
-    // AI More menu
-    document.getElementById('ai-more')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const menu = document.getElementById('ai-more-menu')!;
-      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    });
-
-    document.querySelectorAll('#ai-more-menu button').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        const action = (e.target as HTMLElement).dataset.action as AIAction;
-        await this.aiProcessWithAction(action);
-        document.getElementById('ai-more-menu')!.style.display = 'none';
-      });
-    });
-
-    // Close More menu when clicking outside
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('ai-more-menu')!;
-      const moreBtn = document.getElementById('ai-more')!;
-      if (!menu.contains(e.target as Node) && e.target !== moreBtn) {
-        menu.style.display = 'none';
-      }
+    // Preview hide button
+    document.getElementById('hide-preview')?.addEventListener('click', () => {
+      this.hidePreview();
     });
 
     // Close modal on backdrop click
     document.getElementById('modal-backdrop')?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) {
+        this.hideModal();
+      }
+    });
+
+    // Close modal on Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.isModalVisible() && !this.isAICardVisible()) {
         this.hideModal();
       }
     });
@@ -189,6 +170,7 @@ class TalonApp {
     this.fileManager.setCurrentFilePath(null);
     this.fileManager.setDirty(false);
     this.editor.focus();
+    this.updateUI();
   }
 
   private async openFile(): Promise<void> {
@@ -206,6 +188,7 @@ class TalonApp {
         if (this.preview.isVisible()) {
           this.preview.update(content);
         }
+        this.updateUI();
       }
     } catch (error) {
       alert('Failed to open file: ' + error);
@@ -217,6 +200,7 @@ class TalonApp {
       const success = await this.fileManager.saveFile(this.editor.getContent());
       if (success) {
         this.fileManager.setDirty(false);
+        this.updateUI();
       } else {
         alert('Failed to save file');
       }
@@ -230,6 +214,7 @@ class TalonApp {
       const success = await this.fileManager.saveFileAs(this.editor.getContent());
       if (success) {
         this.fileManager.setDirty(false);
+        this.updateUI();
       } else {
         alert('Failed to save file');
       }
@@ -238,140 +223,120 @@ class TalonApp {
     }
   }
 
-  private togglePreview(): void {
+  private hidePreview(): void {
     this.preview.toggle();
-    if (this.preview.isVisible()) {
-      this.preview.update(this.editor.getContent());
-    }
-  }
-
-  private showRecentFiles(): void {
-    const recent = getRecentFiles();
-    const list = document.getElementById('recent-list')!;
-    list.innerHTML = '';
-
-    if (recent.length === 0) {
-      list.innerHTML = '<p style="color: #999;">No recent files</p>';
-    } else {
-      recent.forEach((path) => {
-        const item = document.createElement('div');
-        item.className = 'recent-item';
-        item.textContent = path;
-        item.addEventListener('click', async () => {
-          if (this.fileManager.isDirtyState()) {
-            if (!confirm('You have unsaved changes. Continue?')) {
-              return;
-            }
-          }
-
-          try {
-            const content = await this.fileManager.readFile(path);
-            this.editor.setContent(content);
-            this.fileManager.setCurrentFilePath(path);
-            this.fileManager.setDirty(false);
-            this.hideModal();
-            if (this.preview.isVisible()) {
-              this.preview.update(content);
-            }
-          } catch (error) {
-            alert('Failed to open file: ' + error);
-          }
-        });
-        list.appendChild(item);
-      });
-    }
-
-    this.showModal('recent-modal');
+    this.updateUI();
   }
 
   private showSettings(): void {
     const settings = loadSettings();
+    
+    // Set provider radio
+    const providerRadio = document.querySelector(
+      `input[name="provider"][value="${settings.provider}"]`
+    ) as HTMLInputElement;
+    if (providerRadio) {
+      providerRadio.checked = true;
+    }
+
+    // Set API key
     (document.getElementById('api-key-input') as HTMLInputElement).value = settings.apiKey;
-    (document.getElementById('autosave-interval') as HTMLInputElement).value =
-      settings.autosaveInterval.toString();
+    
     this.showModal('settings-modal');
   }
 
-  private async aiSummon(): Promise<void> {
-    await this.aiProcessWithAction('rewrite');
-  }
-
-  private async aiProcessWithAction(action: AIAction): Promise<void> {
-    const selection = this.editor.getSelection();
-    
-    let textToProcess: string;
-    if (selection) {
-      // Selection mode
-      textToProcess = selection.text;
-      this.aiCurrentScope = 'selection';
-    } else {
-      // Whole document mode
-      textToProcess = this.editor.getContent();
-      this.aiCurrentScope = 'document';
-    }
-
-    if (!textToProcess.trim()) {
-      alert('No content to process');
+  private async aiSummon(action: AIAction): Promise<void> {
+    // Check if API key is missing
+    if (!hasApiKey()) {
+      this.showModal('missing-key-modal');
       return;
     }
 
-    const actionLabels: Record<AIAction, string> = {
-      rewrite: 'Rewrite',
-      shorten: 'Shorten',
-      outline: 'Outline',
-      'extract-decisions': 'Extract Decisions',
-    };
+    const selection = this.editor.getSelection();
+    
+    let textToProcess: string;
+    let isSelection: boolean;
 
-    this.showStatus(`AI ${actionLabels[action].toLowerCase()}...`);
+    if (selection) {
+      // Selection mode
+      textToProcess = selection.text;
+      isSelection = true;
+    } else {
+      // No selection: extract paragraph + prior heading
+      const content = this.editor.getContent();
+      const cursorPos = this.editor.getCursorPosition();
+      textToProcess = extractParagraphContext(content, cursorPos);
+      isSelection = false;
+    }
+
+    if (!textToProcess.trim()) {
+      return; // Nothing to process
+    }
+
     try {
       const response = await this.aiService.processText(textToProcess, action);
-      this.aiPendingRewrite = response.text;
+      this.aiPendingResult = {
+        text: response.text,
+        isSelection,
+      };
 
-      // Update UI
-      const aiContent = document.getElementById('ai-content')!;
-      aiContent.textContent = response.text;
-      if (response.isMock) {
-        aiContent.textContent = '[MOCK RESPONSE - Add API key in Settings]\n\n' + response.text;
-      }
+      // Update AI card
+      const cardContent = document.getElementById('ai-card-content')!;
+      cardContent.textContent = response.text;
+      
+      const cardLabel = document.getElementById('ai-card-label')!;
+      cardLabel.textContent = action === 'rewrite' ? 'Rewrite for clarity' : 'Extract → ## Decisions';
 
-      // Update action label
-      document.getElementById('ai-action-label')!.textContent = actionLabels[action];
-
-      // Update scope chip
-      const scopeChip = document.getElementById('ai-scope-chip')!;
-      if (this.aiCurrentScope === 'document') {
-        scopeChip.textContent = 'Whole document';
-        scopeChip.style.display = 'inline-block';
-      } else {
-        scopeChip.style.display = 'none';
-      }
-
-      this.showAIPanel();
+      // Position card near cursor
+      this.positionAICard();
+      
+      this.showAICard();
     } catch (error) {
       alert('AI processing failed: ' + error);
-    } finally {
-      this.updateStatus();
     }
+  }
+
+  private positionAICard(): void {
+    const card = document.getElementById('ai-card')!;
+    
+    // Simple positioning: center of screen for now
+    // In production, you'd position near the actual cursor/selection
+    card.style.left = '50%';
+    card.style.top = '30%';
+    card.style.transform = 'translateX(-50%)';
   }
 
   private aiApply(): void {
-    if (!this.aiPendingRewrite) return;
+    if (!this.aiPendingResult) return;
 
-    if (this.aiCurrentScope === 'document') {
-      // Replace whole document
-      this.editor.setContent(this.aiPendingRewrite);
-    } else {
+    const { text, isSelection } = this.aiPendingResult;
+
+    if (isSelection) {
       // Replace selection
-      this.editor.replaceSelection(this.aiPendingRewrite);
+      this.editor.replaceSelection(text);
+    } else {
+      // For paragraph mode, replace the extracted context
+      // For Extract action, append to end of document
+      const action = document.getElementById('ai-card-label')!.textContent;
+      if (action?.includes('Extract')) {
+        // Append to end of document
+        const currentContent = this.editor.getContent();
+        const newContent = currentContent.trim() + '\n\n' + text;
+        this.editor.setContent(newContent);
+      } else {
+        // For now, just replace selection (stub OK per spec)
+        this.editor.replaceSelection(text);
+      }
     }
 
-    this.aiPendingRewrite = null;
-    this.hideAIPanel();
+    this.aiPendingResult = null;
+    this.hideAICard();
+    this.updateUI();
   }
 
   private aiDismiss(): void {
-    this.aiPendingRewrite = null;
-    this.hideAIPanel();
+    this.aiPendingResult = null;
+    this.hideAICard();
   }
 
   private showModal(modalId: string): void {
@@ -395,64 +360,53 @@ class TalonApp {
     backdrop.style.display = 'none';
   }
 
-  private showAIPanel(): void {
-    const panel = document.getElementById('ai-panel')!;
-    panel.style.display = 'block';
+  private isModalVisible(): boolean {
+    const backdrop = document.getElementById('modal-backdrop')!;
+    return backdrop.style.display !== 'none';
   }
 
-  private hideAIPanel(): void {
-    const panel = document.getElementById('ai-panel')!;
-    panel.style.display = 'none';
-    document.getElementById('ai-more-menu')!.style.display = 'none';
+  private showAICard(): void {
+    const card = document.getElementById('ai-card')!;
+    card.style.display = 'block';
   }
 
-  private isAIPanelVisible(): boolean {
-    const panel = document.getElementById('ai-panel')!;
-    return panel.style.display !== 'none';
+  private hideAICard(): void {
+    const card = document.getElementById('ai-card')!;
+    card.style.display = 'none';
   }
 
-  private updateStatus(): void {
-    const status = document.getElementById('status')!;
-    const parts: string[] = [];
+  private isAICardVisible(): boolean {
+    const card = document.getElementById('ai-card')!;
+    return card.style.display !== 'none';
+  }
 
-    if (this.fileManager.getCurrentFilePath()) {
-      parts.push(this.fileManager.getCurrentFilePath()!.split('/').pop()!);
+  private updateUI(): void {
+    // Update title bar
+    const fileName = document.getElementById('file-name')!;
+    const currentPath = this.fileManager.getCurrentFilePath();
+    if (currentPath) {
+      const name = currentPath.split('/').pop() || 'untitled.md';
+      fileName.textContent = name + (this.fileManager.isDirtyState() ? ' •' : '');
     } else {
-      parts.push('Untitled');
+      fileName.textContent = 'untitled.md' + (this.fileManager.isDirtyState() ? ' •' : '');
     }
 
-    if (this.fileManager.isDirtyState()) {
-      parts.push('*');
+    // Update footer
+    const footerPath = document.getElementById('footer-path')!;
+    footerPath.textContent = currentPath || '~/docs/untitled.md';
+
+    const footerWordCount = document.getElementById('footer-word-count')!;
+    const content = this.editor.getContent();
+    const wordCount = countWords(content);
+    footerWordCount.textContent = `${wordCount} word${wordCount === 1 ? '' : 's'}`;
+
+    // Update placeholder visibility
+    const placeholder = document.getElementById('editor-placeholder')!;
+    if (content.trim().length === 0) {
+      placeholder.classList.remove('hidden');
+    } else {
+      placeholder.classList.add('hidden');
     }
-
-    status.textContent = parts.join(' ');
-  }
-
-  private showStatus(message: string): void {
-    const status = document.getElementById('status')!;
-    status.textContent = message;
-  }
-
-  private updateAIButton(): void {
-    const button = document.getElementById('ai-rewrite') as HTMLButtonElement;
-    // Always enabled now (empty selection = whole document)
-    button.disabled = false;
-  }
-
-  private startAutosave(): void {
-    const settings = loadSettings();
-    this.autosaveTimer = window.setInterval(() => {
-      if (this.fileManager.isDirtyState() && this.fileManager.getCurrentFilePath()) {
-        this.saveFile();
-      }
-    }, settings.autosaveInterval * 1000);
-  }
-
-  private restartAutosave(): void {
-    if (this.autosaveTimer) {
-      clearInterval(this.autosaveTimer);
-    }
-    this.startAutosave();
   }
 }
 
