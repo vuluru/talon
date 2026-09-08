@@ -90,7 +90,7 @@ export class AIService {
       default:
         // OpenAI and xAI use similar format
         return {
-          model: provider === 'xai' ? 'grok-beta' : 'gpt-3.5-turbo',
+          model: provider === 'xai' ? 'grok-4.6' : 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',

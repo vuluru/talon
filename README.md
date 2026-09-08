@@ -130,7 +130,7 @@ Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces
 Set your AI provider API key in Settings (⌘, / Ctrl+,). Choose from:
 - **OpenAI** (gpt-3.5-turbo)
 - **Anthropic** (claude-3-sonnet)
-- **xAI** (grok-beta)
+- **xAI** (grok-4.6)
 
 The key is "Stored only on this device" (browser localStorage) and never leaves your machine.
 
