@@ -11,9 +11,9 @@ const SETTINGS_KEY = 'talon-settings';
 
 // Single source of truth for provider → default model mapping
 export const DEFAULT_MODELS: Record<AIProvider, string> = {
-  'xai': 'grok-4.6',
-  'openai': 'gpt-4.1',
-  'anthropic': 'claude-sonnet-4-6',
+  xai: 'grok-4.6',
+  openai: 'gpt-6-astra',      // OpenAI API id for GPT-6 Astra
+  anthropic: 'claude-sonnet-5', // Anthropic Sonnet 5 default
 };
 
 export function getDefaultModel(provider: AIProvider): string {
