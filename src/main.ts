@@ -119,16 +119,6 @@ class TalonApp {
       this.hideModal();
     });
 
-    // Missing key hint modal
-    document.getElementById('open-settings-from-hint')?.addEventListener('click', () => {
-      this.hideModal();
-      this.showSettings();
-    });
-
-    document.getElementById('close-hint')?.addEventListener('click', () => {
-      this.hideModal();
-    });
-
     // AI controls
     document.getElementById('ai-apply')?.addEventListener('click', () => {
       this.aiApply();
@@ -270,7 +260,7 @@ class TalonApp {
   private async aiSummon(action: AIAction = 'rewrite'): Promise<void> {
     // Check if API key is missing
     if (!hasApiKey()) {
-      this.showModal('missing-key-modal');
+      Toast.info('Add a provider key to summon AI · keys stay on this device', 4000);
       return;
     }
 
