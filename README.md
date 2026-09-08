@@ -27,16 +27,17 @@ An AI-centric Markdown word processor built with Tauri and web technologies.
 ### AI Integration (ADR-003)
 - BYO API key (stored locally)
 - **⌘J / Ctrl+J** to summon AI (ephemeral card, not docked)
-- Empty selection → paragraph + prior heading context
+- Empty selection → **whole document** + visible **scope chip**
 - Selection present → processes selection only, Apply replaces in place
 - **Actions**:
-  - **Rewrite for clarity** (default)
-  - **Extract → `## Decisions`** (appends at end of document)
+  - **Rewrite for clarity** (default, primary)
+  - **More** control: Shorten / Outline / Extract → `## Decisions`
 - **Apply (⏎)** / **Dismiss (Esc)** workflow
 - Single suggestion only (no carousel, no chat thread)
 - Never auto-apply
 - Mock responses available without API key
 - Missing key → soft Settings hint (not dead end)
+- Extract always appends to end of document
 
 ### Settings (BYO)
 - **Provider selection**: OpenAI / Anthropic / xAI
