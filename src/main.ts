@@ -14,6 +14,7 @@ class TalonApp {
   private aiPendingResult: { text: string; isWholeDocument: boolean; action: AIAction } | null = null;
   private aiRequestInFlight: boolean = false;
   private aiAbortController: AbortController | null = null;
+  private lastAnchorRect: DOMRect | null = null;
 
   constructor() {
     // Initialize components
@@ -400,11 +401,23 @@ class TalonApp {
     }
     
     if (!anchorRect) {
-      // Fallback: position in center if we can't get coordinates
-      card.style.left = '50%';
-      card.style.top = '30%';
-      card.style.transform = 'translateX(-50%)';
-      return;
+      // Fallback: prefer last-known anchor, else editor pane top-left
+      if (this.lastAnchorRect) {
+        anchorRect = this.lastAnchorRect;
+      } else {
+        // Use editor container as anchor
+        const editorContainer = document.getElementById('editor-container');
+        if (editorContainer) {
+          const editorRect = editorContainer.getBoundingClientRect();
+          anchorRect = new DOMRect(editorRect.left, editorRect.top, 0, 0);
+        } else {
+          // Ultimate fallback: viewport top-left
+          anchorRect = new DOMRect(0, 0, 0, 0);
+        }
+      }
+    } else {
+      // Store successful anchor for future fallback
+      this.lastAnchorRect = anchorRect;
     }
 
     // Position card 8-12px below-right of anchor (using 10px as middle value)
