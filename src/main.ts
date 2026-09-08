@@ -213,6 +213,9 @@ class TalonApp {
       const success = await this.fileManager.saveFile(this.editor.getContent());
       if (!success) {
         Toast.error('Failed to save file');
+      } else {
+        this.fileManager.setDirty(false);
+        this.updateUI();
       }
     } catch (error) {
       Toast.error('Failed to save file: ' + (error as Error).message);
@@ -224,6 +227,9 @@ class TalonApp {
       const success = await this.fileManager.saveFileAs(this.editor.getContent());
       if (!success) {
         Toast.error('Failed to save file');
+      } else {
+        this.fileManager.setDirty(false);
+        this.updateUI();
       }
     } catch (error) {
       Toast.error('Failed to save file: ' + (error as Error).message);
@@ -237,6 +243,9 @@ class TalonApp {
 
   private togglePreview(): void {
     this.preview.toggle();
+    if (this.preview.isVisible()) {
+      this.preview.update(this.editor.getContent());
+    }
     this.updateUI();
   }
 
