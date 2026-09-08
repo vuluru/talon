@@ -12,6 +12,8 @@ class TalonApp {
   private preview: Preview;
   private aiService: AIService;
   private aiPendingResult: { text: string; isWholeDocument: boolean; action: AIAction } | null = null;
+  private aiRequestInFlight: boolean = false;
+  private aiAbortController: AbortController | null = null;
 
   constructor() {
     // Initialize components
@@ -279,6 +281,11 @@ class TalonApp {
   }
 
   private async aiSummon(action: AIAction = 'rewrite'): Promise<void> {
+    // Ignore re-summon while request is in flight (no queue)
+    if (this.aiRequestInFlight) {
+      return;
+    }
+
     // Check if API key is missing
     if (!hasApiKey()) {
       Toast.info('Add a provider key to summon AI · keys stay on this device', 4000);
@@ -304,43 +311,75 @@ class TalonApp {
       return; // Nothing to process
     }
 
+    // Mark request in flight
+    this.aiRequestInFlight = true;
+    this.aiAbortController = new AbortController();
+
+    // Show AI card immediately with pending state
+    const actionLabels: Record<AIAction, string> = {
+      rewrite: 'Rewriting…',
+      shorten: 'Working…',
+      outline: 'Working…',
+      'extract-decisions': 'Working…',
+    };
+
+    const cardLabel = document.getElementById('ai-card-label')!;
+    cardLabel.textContent = actionLabels[action];
+
+    const cardContent = document.getElementById('ai-card-content')!;
+    cardContent.textContent = '';
+
+    const scopeChip = document.getElementById('ai-scope-chip')!;
+    if (isWholeDocument) {
+      scopeChip.textContent = 'Scope: whole document';
+      scopeChip.style.display = 'inline-block';
+    } else {
+      scopeChip.textContent = 'Scope: selection';
+      scopeChip.style.display = 'inline-block';
+    }
+
+    // Disable Apply and More buttons during pending state
+    this.setAICardBusy(true);
+
+    this.positionAICard();
+    this.showAICard();
+
     try {
-      const response = await this.aiService.processText(textToProcess, action);
+      const response = await this.aiService.processText(textToProcess, action, this.aiAbortController.signal);
+      
+      // Check if aborted
+      if (this.aiAbortController.signal.aborted) {
+        return;
+      }
+
       this.aiPendingResult = {
         text: response.text,
         isWholeDocument,
         action,
       };
 
-      // Update AI card
-      const cardContent = document.getElementById('ai-card-content')!;
+      // Update AI card with result
       cardContent.textContent = response.text;
       
-      const cardLabel = document.getElementById('ai-card-label')!;
-      const actionLabels: Record<AIAction, string> = {
+      const resultLabels: Record<AIAction, string> = {
         rewrite: 'Rewrite for clarity',
         shorten: 'Shorten',
         outline: 'Outline',
         'extract-decisions': 'Extract → ## Decisions',
       };
-      cardLabel.textContent = actionLabels[action];
+      cardLabel.textContent = resultLabels[action];
 
-      // Update scope chip visibility and text
-      const scopeChip = document.getElementById('ai-scope-chip')!;
-      if (isWholeDocument) {
-        scopeChip.textContent = 'Scope: whole document';
-        scopeChip.style.display = 'inline-block';
-      } else {
-        scopeChip.textContent = 'Scope: selection';
-        scopeChip.style.display = 'inline-block';
-      }
-
-      // Position card near cursor
-      this.positionAICard();
-      
-      this.showAICard();
+      // Enable Apply and More buttons
+      this.setAICardBusy(false);
     } catch (error) {
-      Toast.error('AI processing failed: ' + (error as Error).message);
+      // Only show error if not aborted
+      if (!this.aiAbortController?.signal.aborted) {
+        Toast.error('AI processing failed: ' + (error as Error).message);
+      }
+      this.hideAICard();
+    } finally {
+      this.aiRequestInFlight = false;
+      this.aiAbortController = null;
     }
   }
 
@@ -378,6 +417,13 @@ class TalonApp {
   }
 
   private aiDismiss(): void {
+    // Cancel in-flight request if any
+    if (this.aiAbortController) {
+      this.aiAbortController.abort();
+      this.aiAbortController = null;
+    }
+    
+    this.aiRequestInFlight = false;
     this.aiPendingResult = null;
     this.hideAICard();
   }
@@ -421,6 +467,14 @@ class TalonApp {
   private isAICardVisible(): boolean {
     const card = document.getElementById('ai-card')!;
     return card.style.display !== 'none';
+  }
+
+  private setAICardBusy(busy: boolean): void {
+    const applyBtn = document.getElementById('ai-apply') as HTMLButtonElement;
+    const moreBtn = document.getElementById('ai-more') as HTMLButtonElement;
+    
+    applyBtn.disabled = busy;
+    moreBtn.disabled = busy;
   }
 
   private updateUI(): void {

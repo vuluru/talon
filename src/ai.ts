@@ -9,7 +9,7 @@ export interface AIResponse {
 export type AIAction = 'rewrite' | 'shorten' | 'outline' | 'extract-decisions';
 
 export class AIService {
-  async processText(text: string, action: AIAction = 'rewrite'): Promise<AIResponse> {
+  async processText(text: string, action: AIAction = 'rewrite', signal?: AbortSignal): Promise<AIResponse> {
     const apiKey = getApiKey();
     const provider = getProvider();
 
@@ -33,6 +33,7 @@ export class AIService {
           'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify(payload),
+        signal,
       });
 
       if (!response.ok) {
