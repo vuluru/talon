@@ -101,6 +101,27 @@ npm run tauri build
 
 Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces .msi and .exe.
 
+## Installation
+
+### Arch Linux (AUR)
+
+When published, install the AUR package **`talon`** (binary/prebuilt PKGBUILD under `packaging/aur/talon-bin/` — Arch `-bin` layout; searchable name is `talon`):
+
+```bash
+# AUR helper (e.g. yay, paru) — package name is talon
+yay -S talon
+
+# Or manually (after package is on AUR as talon)
+git clone https://aur.archlinux.org/talon.git
+cd talon
+makepkg -si
+```
+
+After install: app menu **Talon**, or `talon` in terminal.
+
+Scaffold only until a tagged Linux release exists (PKGBUILD sha256sums still SKIP / placeholder URL).
+See `packaging/aur/README.md`.
+
 ## Project Structure
 
 ```
