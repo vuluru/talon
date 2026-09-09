@@ -103,24 +103,45 @@ Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces
 
 ## Installation
 
-### Arch Linux (AUR)
+### Linux (x86_64)
 
-When published, install the AUR package **`talon`** (binary/prebuilt PKGBUILD under `packaging/aur/talon-bin/` — Arch `-bin` layout; searchable name is `talon`):
+Download the latest release from [GitHub Releases](https://github.com/vuluru/talon/releases):
 
 ```bash
-# AUR helper (e.g. yay, paru) — package name is talon
-yay -S talon
+# Download v0.1.0 tarball (check Releases page for newer versions)
+curl -LO https://github.com/vuluru/talon/releases/download/v0.1.0/talon-0.1.0-linux-x86_64.tar.gz
 
-# Or manually (after package is on AUR as talon)
-git clone https://aur.archlinux.org/talon.git
-cd talon
-makepkg -si
+# Verify checksum (use sha256 from Release notes for newer versions)
+echo "113b887b2356ba984cc33ce12ee65ebb0265eb8b968b89d2a46aa155def2b52a  talon-0.1.0-linux-x86_64.tar.gz" | sha256sum -c
+
+# Extract
+tar xzf talon-0.1.0-linux-x86_64.tar.gz
+
+# Install binary (requires sudo)
+sudo install -Dm755 talon /usr/local/bin/talon
 ```
 
-After install: app menu **Talon**, or `talon` in terminal.
+**Optional**: Add desktop entry and icon for application menu:
 
-Scaffold only until a tagged Linux release exists (PKGBUILD sha256sums still SKIP / placeholder URL).
-See `packaging/aur/README.md`.
+```bash
+# Copy from the repository's packaging files
+sudo install -Dm644 packaging/aur/talon-bin/talon.desktop /usr/share/applications/talon.desktop
+sudo install -Dm644 packaging/aur/talon-bin/talon.png /usr/share/pixmaps/talon.png
+```
+
+**Note**: Future releases will bundle the desktop file and icon in the tarball.
+
+After install: run `talon` from terminal, or launch **Talon** from your application menu (if desktop entry installed).
+
+### Arch Linux (AUR)
+
+AUR package **`talon`** is deferred until AUR package registration reopens. When available, install via:
+
+```bash
+yay -S talon
+```
+
+See `packaging/aur/README.md` for packaging details.
 
 ## Project Structure
 
