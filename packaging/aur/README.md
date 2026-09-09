@@ -61,15 +61,23 @@ To publish a new release:
 1. **Create GitHub Release**:
    - Tag version (e.g., `v0.1.0`)
    - Build Linux binary: `npm run tauri build`
-   - Package as tarball: `tar czf talon-0.1.0-linux-x86_64.tar.gz -C src-tauri/target/release talon`
-   - Upload to GitHub Releases
+   - Package as tarball including desktop entry and icon:
+     ```bash
+     mkdir -p talon-pkg
+     cp src-tauri/target/release/talon talon-pkg/
+     cp packaging/aur/talon-bin/talon.desktop talon-pkg/
+     cp packaging/aur/talon-bin/talon.png talon-pkg/
+     tar czf talon-0.1.0-linux-x86_64.tar.gz -C talon-pkg .
+     ```
+   - Generate checksums: `sha256sum talon-0.1.0-linux-x86_64.tar.gz`
+   - Upload tarball to GitHub Releases with checksum in release notes
 
 2. **Update PKGBUILD**:
    - Update `pkgver` to match release version
    - Update `sha256sums` with checksums from release artifacts
    - Test build with `makepkg -si`
 
-3. **Publish to AUR**:
+3. **Publish to AUR** (when registration reopens):
    - Update `.SRCINFO`: `makepkg --printsrcinfo > .SRCINFO`
    - Commit and push to AUR repository
 
@@ -88,9 +96,9 @@ This packaging implementation satisfies ADR-004 requirements:
 
 ## Notes
 
-- **AUR search name**: `talon` (when published)
+- **AUR search name**: `talon` (deferred until registration reopens)
 - **Repo directory**: `talon-bin/` is the local packaging path (binary-style PKGBUILD)
-- Source URL pattern is prepared for GitHub releases (placeholder until first release is cut)
+- Source URL pattern points to GitHub releases (v0.1.0 published with real checksums)
 - Binary name is `talon` via Cargo.toml `[[bin]] name = "talon"` — installs to `/usr/bin/talon`
 - No second binary, no separate opener application
-- PKGBUILD sha256sums are `SKIP` (placeholders) until a tagged Linux release exists
+- PKGBUILD includes verified sha256sums from v0.1.0 release

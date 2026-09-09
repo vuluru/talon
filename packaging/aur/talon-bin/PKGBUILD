@@ -15,15 +15,8 @@ sha256sums=('113b887b2356ba984cc33ce12ee65ebb0265eb8b968b89d2a46aa155def2b52a'
             'b5d93c8ec365c08b11bd006e46a46e227c681d30bb295af3d017573bfc752a83')
 
 package() {
-    # Install binary (handle both talon and talon-app for compatibility)
-    if [ -f "$srcdir/talon" ]; then
-        install -Dm755 "$srcdir/talon" "$pkgdir/usr/bin/talon"
-    elif [ -f "$srcdir/talon-app" ]; then
-        install -Dm755 "$srcdir/talon-app" "$pkgdir/usr/bin/talon"
-    else
-        echo "Error: Binary not found"
-        return 1
-    fi
+    # Install binary
+    install -Dm755 "$srcdir/talon" "$pkgdir/usr/bin/talon"
     
     # Install desktop file
     install -Dm644 "$srcdir/talon.desktop" "$pkgdir/usr/share/applications/talon.desktop"
