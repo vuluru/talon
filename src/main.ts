@@ -1,6 +1,7 @@
 import { Editor } from './editor';
 import { FileManager } from './fileManager';
 import { Preview } from './preview';
+import { Print } from './print';
 import { AIService, AIAction } from './ai';
 import { loadSettings, saveSettings, hasApiKey, getDefaultModel, getTypewriterScroll } from './settings';
 import { countWords, modKeyLabel } from './utils';
@@ -10,6 +11,7 @@ class TalonApp {
   private editor: Editor;
   private fileManager: FileManager;
   private preview: Preview;
+  private print: Print;
   private aiService: AIService;
   private aiPendingResult: { text: string; isWholeDocument: boolean; action: AIAction } | null = null;
   private aiRequestInFlight: boolean = false;
@@ -22,6 +24,7 @@ class TalonApp {
     this.editor = new Editor(document.getElementById('editor')!);
     this.fileManager = new FileManager();
     this.preview = new Preview(document.getElementById('preview')!);
+    this.print = new Print();
     this.aiService = new AIService();
 
     // Initialize typewriter scroll from settings
@@ -65,6 +68,7 @@ class TalonApp {
     document.getElementById('shortcut-open')!.textContent = `${modKey}+O`;
     document.getElementById('shortcut-save')!.textContent = `${modKey}+S`;
     document.getElementById('shortcut-find')!.textContent = `${modKey}+F`;
+    document.getElementById('shortcut-print')!.textContent = `${modKey}+P`;
     
     const isMac = navigator.platform.toLowerCase().includes('mac');
     document.getElementById('shortcut-saveas')!.textContent = isMac ? `${modKey}⇧S` : `${modKey}+Shift+S`;
@@ -144,6 +148,10 @@ class TalonApp {
           case 's':
             e.preventDefault();
             this.saveFile();
+            break;
+          case 'p':
+            e.preventDefault();
+            this.printDocument();
             break;
           case '\\':
             e.preventDefault();
@@ -409,6 +417,15 @@ class TalonApp {
       }
     } catch (error) {
       Toast.error('Failed to save file: ' + (error as Error).message);
+    }
+  }
+
+  private async printDocument(): Promise<void> {
+    try {
+      const content = this.editor.getContent();
+      await this.print.printDocument(content);
+    } catch (error) {
+      Toast.error('Failed to print: ' + (error as Error).message);
     }
   }
 
