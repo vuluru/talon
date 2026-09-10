@@ -314,7 +314,7 @@ body {
   margin-left: auto;
 }
 
-#footer-summon-hint {
+.footer-chip {
   color: #999;
   background: #2b2b2b;
   padding: 2px 8px;
@@ -324,12 +324,6 @@ body {
 }
 
 #footer-shortcuts-chip {
-  color: #999;
-  background: #2b2b2b;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  border: 1px solid #333;
   cursor: pointer;
   transition: background 0.15s ease;
 }
