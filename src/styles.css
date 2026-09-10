@@ -454,6 +454,20 @@ body {
   font-size: 14px;
 }
 
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
 .modal input[type="password"],
 .modal input[type="text"] {
   display: block;
