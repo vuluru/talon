@@ -1,6 +1,6 @@
 # Talon
 
-An AI-centric Markdown word processor for Arch Linux and other platforms.  
+An Omarchy / Arch-friendly AI-centric Markdown word processor.  
 **Thin chrome, Markdown-honest source editing** — no WYSIWYG bloat.  
 Install from [GitHub Releases](#installation) (Linux x86_64 tarball available now).  
 AUR package **`talon`** will be available when AUR registration reopens (not yet live).
