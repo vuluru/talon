@@ -62,7 +62,7 @@ class TalonApp {
     document.getElementById('shortcut-save')!.textContent = `${modKey}+S`;
     
     const isMac = navigator.platform.toLowerCase().includes('mac');
-    document.getElementById('shortcut-saveas')!.textContent = isMac ? `${modKey}+⇧+S` : `${modKey}+Shift+S`;
+    document.getElementById('shortcut-saveas')!.textContent = isMac ? `${modKey}⇧S` : `${modKey}+Shift+S`;
     document.getElementById('shortcut-sheet')!.textContent = `${modKey}+/`;
   }
 
