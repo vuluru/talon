@@ -1,6 +1,6 @@
 # Maintainer: Talon Team <https://github.com/vuluru/talon>
 pkgname=talon
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc="AI-centric Markdown word processor"
 arch=('x86_64')
