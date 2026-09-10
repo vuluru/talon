@@ -19,6 +19,7 @@ export class Editor {
   private view: EditorView;
   private onChangeCallback?: (content: string) => void;
   private onSelectionChangeCallback?: () => void;
+  private typewriterScrollEnabled: boolean = false;
 
   constructor(parent: HTMLElement) {
     const state = EditorState.create({
@@ -37,6 +38,10 @@ export class Editor {
         EditorView.updateListener.of((update) => {
           if (update.docChanged && this.onChangeCallback) {
             this.onChangeCallback(this.getContent());
+          }
+          if (update.docChanged && this.typewriterScrollEnabled) {
+            // Typewriter scroll: keep caret near mid-viewport
+            this.scrollCaretToMidViewport();
           }
           if (update.selectionSet && this.onSelectionChangeCallback) {
             this.onSelectionChangeCallback();
@@ -157,6 +162,7 @@ export class Editor {
     return new DOMRect(left, top, right - left, bottom - top);
   }
 
+<<<<<<< HEAD
   openFind(): void {
     openSearchPanel(this.view);
   }
@@ -228,5 +234,30 @@ export class Editor {
     }
 
     return { current, total: matches.length };
+  }
+
+  setTypewriterScroll(enabled: boolean): void {
+    this.typewriterScrollEnabled = enabled;
+  }
+
+  private scrollCaretToMidViewport(): void {
+    const pos = this.view.state.selection.main.head;
+    const coords = this.view.coordsAtPos(pos);
+    if (!coords) return;
+
+    const editorRect = this.view.dom.getBoundingClientRect();
+    const viewportHeight = editorRect.height;
+    const caretTop = coords.top - editorRect.top;
+    const midViewport = viewportHeight / 2;
+
+    // Only scroll if caret is not already near mid-viewport
+    const threshold = viewportHeight * 0.1; // 10% threshold
+    if (Math.abs(caretTop - midViewport) > threshold) {
+      // Calculate scroll offset to center the caret
+      const currentScroll = this.view.scrollDOM.scrollTop;
+      const targetScroll = currentScroll + (caretTop - midViewport);
+
+      this.view.scrollDOM.scrollTop = targetScroll;
+    }
   }
 }

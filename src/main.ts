@@ -2,7 +2,7 @@ import { Editor } from './editor';
 import { FileManager } from './fileManager';
 import { Preview } from './preview';
 import { AIService, AIAction } from './ai';
-import { loadSettings, saveSettings, hasApiKey, getDefaultModel } from './settings';
+import { loadSettings, saveSettings, hasApiKey, getDefaultModel, getTypewriterScroll } from './settings';
 import { countWords, modKeyLabel } from './utils';
 import { Toast } from './toast';
 
@@ -23,6 +23,9 @@ class TalonApp {
     this.fileManager = new FileManager();
     this.preview = new Preview(document.getElementById('preview')!);
     this.aiService = new AIService();
+
+    // Initialize typewriter scroll from settings
+    this.editor.setTypewriterScroll(getTypewriterScroll());
 
     // Setup platform-aware shortcuts
     this.setupPlatformShortcuts();
@@ -177,8 +180,13 @@ class TalonApp {
       const provider = (document.querySelector('input[name="provider"]:checked') as HTMLInputElement).value as any;
       const model = (document.getElementById('model-input') as HTMLInputElement).value.trim();
       const apiKey = (document.getElementById('api-key-input') as HTMLInputElement).value;
+      const typewriterScroll = (document.getElementById('typewriter-scroll-checkbox') as HTMLInputElement).checked;
 
-      saveSettings({ provider, model, apiKey });
+      saveSettings({ provider, model, apiKey, typewriterScroll });
+      
+      // Update editor typewriter scroll setting
+      this.editor.setTypewriterScroll(typewriterScroll);
+      
       this.hideModal();
     });
 
@@ -433,6 +441,9 @@ class TalonApp {
 
     // Set API key
     (document.getElementById('api-key-input') as HTMLInputElement).value = settings.apiKey;
+    
+    // Set typewriter scroll checkbox
+    (document.getElementById('typewriter-scroll-checkbox') as HTMLInputElement).checked = settings.typewriterScroll || false;
     
     this.showModal('settings-modal');
   }

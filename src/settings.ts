@@ -5,6 +5,7 @@ interface Settings {
   provider: AIProvider;
   apiKey: string;
   model: string;
+  typewriterScroll?: boolean;
 }
 
 const SETTINGS_KEY = 'talon-settings';
@@ -28,6 +29,10 @@ export function loadSettings(): Settings {
     if (!settings.model) {
       settings.model = getDefaultModel(settings.provider);
     }
+    // Ensure typewriterScroll field exists (default false)
+    if (settings.typewriterScroll === undefined) {
+      settings.typewriterScroll = false;
+    }
     return settings;
   }
   const provider = 'openai';
@@ -35,6 +40,7 @@ export function loadSettings(): Settings {
     provider,
     apiKey: '',
     model: getDefaultModel(provider),
+    typewriterScroll: false,
   };
 }
 
@@ -63,4 +69,8 @@ export function getModel(): string {
   const settings = loadSettings();
   // Fallback: if stored model is empty, return provider default
   return settings.model.trim() || getDefaultModel(settings.provider);
+}
+
+export function getTypewriterScroll(): boolean {
+  return loadSettings().typewriterScroll || false;
 }
