@@ -53,6 +53,7 @@
         <span id="footer-path">~/docs/untitled.md</span>
         <span id="footer-word-count">0 words</span>
         <span id="footer-summon-hint"></span>
+        <span id="footer-shortcuts-chip"></span>
       </div>
 
       <div id="modal-backdrop" style="display: none;">
@@ -92,6 +93,53 @@
           <div class="modal-buttons">
             <button id="save-settings">Save</button>
             <button id="cancel-settings">Cancel</button>
+          </div>
+        </div>
+
+        <div id="shortcuts-modal" class="modal">
+          <h2>Shortcuts</h2>
+          
+          <div class="shortcuts-list">
+            <div class="shortcut-row">
+              <span class="shortcut-action">Summon AI</span>
+              <span class="shortcut-keys" id="shortcut-summon"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Apply</span>
+              <span class="shortcut-keys">Enter</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Dismiss</span>
+              <span class="shortcut-keys">Esc</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Preview</span>
+              <span class="shortcut-keys" id="shortcut-preview"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Settings — provider · model · API key</span>
+              <span class="shortcut-keys" id="shortcut-settings"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">New</span>
+              <span class="shortcut-keys" id="shortcut-new"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Open</span>
+              <span class="shortcut-keys" id="shortcut-open"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Save</span>
+              <span class="shortcut-keys" id="shortcut-save"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Save As</span>
+              <span class="shortcut-keys" id="shortcut-saveas"></span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">This sheet</span>
+              <span class="shortcut-keys" id="shortcut-sheet"></span>
+            </div>
           </div>
         </div>
       </div>

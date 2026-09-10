@@ -48,6 +48,22 @@ class TalonApp {
     // Update footer summon hint
     const footerHint = document.getElementById('footer-summon-hint')!;
     footerHint.textContent = `${modKey}+J`;
+
+    // Update footer shortcuts chip
+    const footerShortcutsChip = document.getElementById('footer-shortcuts-chip')!;
+    footerShortcutsChip.textContent = `${modKey}+/`;
+
+    // Update shortcuts in the shortcuts modal
+    document.getElementById('shortcut-summon')!.textContent = `${modKey}+J`;
+    document.getElementById('shortcut-preview')!.textContent = `${modKey}+\\`;
+    document.getElementById('shortcut-settings')!.textContent = `${modKey}+,`;
+    document.getElementById('shortcut-new')!.textContent = `${modKey}+N`;
+    document.getElementById('shortcut-open')!.textContent = `${modKey}+O`;
+    document.getElementById('shortcut-save')!.textContent = `${modKey}+S`;
+    
+    const isMac = navigator.platform.toLowerCase().includes('mac');
+    document.getElementById('shortcut-saveas')!.textContent = isMac ? `${modKey}⇧S` : `${modKey}+Shift+S`;
+    document.getElementById('shortcut-sheet')!.textContent = `${modKey}+/`;
   }
 
   private setupEditor(): void {
@@ -128,6 +144,10 @@ class TalonApp {
             e.preventDefault();
             this.showSettings();
             break;
+          case '/':
+            e.preventDefault();
+            this.toggleShortcutsModal();
+            break;
         }
       } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
@@ -207,6 +227,11 @@ class TalonApp {
       if (e.target === e.currentTarget) {
         this.hideModal();
       }
+    });
+
+    // Shortcuts chip click handler
+    document.getElementById('footer-shortcuts-chip')?.addEventListener('click', () => {
+      this.toggleShortcutsModal();
     });
 
     // Close modal on Esc
@@ -312,6 +337,20 @@ class TalonApp {
     (document.getElementById('api-key-input') as HTMLInputElement).value = settings.apiKey;
     
     this.showModal('settings-modal');
+  }
+
+  private toggleShortcutsModal(): void {
+    const backdrop = document.getElementById('modal-backdrop')!;
+    const shortcutsModal = document.getElementById('shortcuts-modal')!;
+    
+    // Check if shortcuts modal is currently visible
+    if (backdrop.style.display !== 'none' && shortcutsModal.style.display !== 'none') {
+      // If shortcuts modal is visible, hide it
+      this.hideModal();
+    } else {
+      // Otherwise, show the shortcuts modal
+      this.showModal('shortcuts-modal');
+    }
   }
 
   private async aiSummon(action: AIAction = 'rewrite'): Promise<void> {
