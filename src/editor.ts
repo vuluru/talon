@@ -39,8 +39,8 @@ export class Editor {
           if (update.docChanged && this.onChangeCallback) {
             this.onChangeCallback(this.getContent());
           }
-          if (update.docChanged && this.typewriterScrollEnabled) {
-            // Typewriter scroll: keep caret near mid-viewport
+          if (this.typewriterScrollEnabled && (update.docChanged || update.selectionSet)) {
+            // Typewriter scroll: keep caret near mid-viewport on typing AND caret movement
             this.scrollCaretToMidViewport();
           }
           if (update.selectionSet && this.onSelectionChangeCallback) {
@@ -162,7 +162,6 @@ export class Editor {
     return new DOMRect(left, top, right - left, bottom - top);
   }
 
-<<<<<<< HEAD
   openFind(): void {
     openSearchPanel(this.view);
   }
