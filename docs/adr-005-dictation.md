@@ -29,8 +29,8 @@ When unparked, prefer a **thin Dictate** path:
 
 ## Backlog note
 
-- **Blocked on:** Omarchy dogfood of v0.1.2 Shortcuts (+ AUR reopen path).
-- **Unpark trigger:** Jason GO after dogfood; then Design pack → Build tip.
+- **Blocked on:** AUR reopen path (optional). v0.1.2 Shortcuts Omarchy dogfood PASS (2026-09-10).
+- **Unpark trigger:** Jason GO; then Design pack → Build tip.
 - **Non-goals until then:** no Design pixels, no Build spike, no release bake.
 
 ## Acceptance (when built)
