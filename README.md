@@ -24,7 +24,6 @@ AUR package **`talon`** will be available when AUR registration reopens (not yet
 ### File Operations
 - Open, Save, Save As file operations
 - Dirty state tracking (• indicator)
-- Recent files list (localStorage persistence)
 - Markdown source editing (CodeMirror 6)
 
 ### AI Integration (ADR-003)
@@ -149,7 +148,6 @@ See `packaging/aur/README.md` for packaging details.
 │   ├── preview.ts         # Markdown preview
 │   ├── ai.ts              # AI service
 │   ├── settings.ts        # Settings management
-│   ├── recentFiles.ts     # Recent files tracking
 │   └── styles.css         # Styles
 ├── src-tauri/             # Rust backend
 │   ├── src/
