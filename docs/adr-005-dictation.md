@@ -19,7 +19,7 @@ When unparked, prefer a **thin Dictate** path:
 2. **vN candidate:** one hotkey (hold-to-talk), stream STT into the caret via **BYO STT key** (e.g. Whisper / Deepgram-class), Esc cancel — same ephemeral tone as summon. No docked mic panel, no menu-bar Help.
 3. **Later Omarchy option:** local Whisper sidecar (privacy) — separate ADR addendum; heavier packaging.
 
-**Out for this stub:** always-on listening, voice commands for app chrome, multi-speaker meetings, role "modes."
+**Out for this stub:** always-on listening, voice commands for app chrome, multi-speaker meetings, role “modes.”
 
 ## Consequences
 
@@ -37,5 +37,5 @@ When unparked, prefer a **thin Dictate** path:
 
 1. Hotkey starts/stops dictate; text inserts at caret.
 2. Esc cancels without leaving junk chrome.
-3. BYO STT key stored locally (same "on this device" posture as ADR-003).
+3. BYO STT key stored locally (same “on this device” posture as ADR-003).
 4. No permanent mic button / voice dock unless Design revises ADR-001 chrome budget.
