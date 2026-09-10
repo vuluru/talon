@@ -1,6 +1,6 @@
 # Maintainer: Talon Team <https://github.com/vuluru/talon>
 pkgname=talon
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="AI-centric Markdown word processor"
 arch=('x86_64')
@@ -10,9 +10,9 @@ depends=('webkit2gtk-4.1' 'gtk3' 'cairo')
 source=("$pkgname-$pkgver::https://github.com/vuluru/talon/releases/download/v$pkgver/talon-$pkgver-linux-x86_64.tar.gz"
         "talon.desktop"
         "talon.png")
-sha256sums=('113b887b2356ba984cc33ce12ee65ebb0265eb8b968b89d2a46aa155def2b52a'
+sha256sums=('15d116e28dfa79bc4eace135738122c864b6afba62945a78382520439cbd6dec'
             'ed45025ebe0975062436077de0ed05dafe73099c01535053d1eee44afeb8169b'
-            'b5d93c8ec365c08b11bd006e46a46e227c681d30bb295af3d017573bfc752a83')
+            'b1c90b664bc2f0a3cfc2b9e11558ac188fae9311ebc7e02b36cd3303bbeda4aa')
 
 package() {
     # Install binary
