@@ -11,7 +11,7 @@ pkgbase = talon
 	source = talon-0.1.2::https://github.com/vuluru/talon/releases/download/v0.1.2/talon-0.1.2-linux-x86_64.tar.gz
 	source = talon.desktop
 	source = talon.png
-	sha256sums = 219f5b8a0f6dcd467ab01613ff0cd636c8b92e91e54b538f18e0847b3bb65903
+	sha256sums = d5892b558d20d93ce5470fdca71d64b4bd88a02d579eb6a470b802e985375d24
 	sha256sums = ed45025ebe0975062436077de0ed05dafe73099c01535053d1eee44afeb8169b
 	sha256sums = b1c90b664bc2f0a3cfc2b9e11558ac188fae9311ebc7e02b36cd3303bbeda4aa
 
