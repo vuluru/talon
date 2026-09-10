@@ -6,8 +6,6 @@ import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { history, historyKeymap } from '@codemirror/commands';
 import { 
   search, 
-  openSearchPanel, 
-  closeSearchPanel, 
   findNext, 
   findPrevious,
   setSearchQuery,
@@ -30,11 +28,7 @@ export class Editor {
         syntaxHighlighting(defaultHighlightStyle),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
-        search({
-          createPanel: () => {
-            return { dom: document.createElement('div'), top: true };
-          },
-        }),
+        search(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged && this.onChangeCallback) {
             this.onChangeCallback(this.getContent());
@@ -163,11 +157,18 @@ export class Editor {
   }
 
   openFind(): void {
-    openSearchPanel(this.view);
+    // No-op: custom find bar handles UI, search highlights driven by setFindQuery
   }
 
   closeFind(): void {
-    closeSearchPanel(this.view);
+    // Clear search query to remove highlights
+    const emptyQuery = new SearchQuery({
+      search: '',
+      caseSensitive: false,
+      regexp: false,
+      wholeWord: false,
+    });
+    this.view.dispatch({ effects: setSearchQuery.of(emptyQuery) });
   }
 
   findNext(): void {
