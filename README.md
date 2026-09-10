@@ -108,30 +108,22 @@ Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces
 Download the latest release from [GitHub Releases](https://github.com/vuluru/talon/releases):
 
 ```bash
-# Download v0.1.0 tarball (check Releases page for newer versions)
-curl -LO https://github.com/vuluru/talon/releases/download/v0.1.0/talon-0.1.0-linux-x86_64.tar.gz
+# Download v0.1.1 tarball (check Releases page for newer versions)
+curl -LO https://github.com/vuluru/talon/releases/download/v0.1.1/talon-0.1.1-linux-x86_64.tar.gz
 
 # Verify checksum (use sha256 from Release notes for newer versions)
-echo "113b887b2356ba984cc33ce12ee65ebb0265eb8b968b89d2a46aa155def2b52a  talon-0.1.0-linux-x86_64.tar.gz" | sha256sum -c
+echo "15d116e28dfa79bc4eace135738122c864b6afba62945a78382520439cbd6dec  talon-0.1.1-linux-x86_64.tar.gz" | sha256sum -c
 
 # Extract
-tar xzf talon-0.1.0-linux-x86_64.tar.gz
+tar xzf talon-0.1.1-linux-x86_64.tar.gz
 
-# Install binary (requires sudo)
+# Install binary, desktop entry, and icon (requires sudo)
 sudo install -Dm755 talon /usr/local/bin/talon
+sudo install -Dm644 talon.desktop /usr/share/applications/talon.desktop
+sudo install -Dm644 talon.png /usr/share/pixmaps/talon.png
 ```
 
-**Optional**: Add desktop entry and icon for application menu:
-
-```bash
-# Copy from the repository's packaging files
-sudo install -Dm644 packaging/aur/talon-bin/talon.desktop /usr/share/applications/talon.desktop
-sudo install -Dm644 packaging/aur/talon-bin/talon.png /usr/share/pixmaps/talon.png
-```
-
-**Note**: Future releases will bundle the desktop file and icon in the tarball.
-
-After install: run `talon` from terminal, or launch **Talon** from your application menu (if desktop entry installed).
+After install: run `talon` from terminal, or launch **Talon** from your application menu.
 
 ### Arch Linux (AUR)
 
