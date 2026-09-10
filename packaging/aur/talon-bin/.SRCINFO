@@ -1,6 +1,6 @@
 pkgbase = talon
 	pkgdesc = AI-centric Markdown word processor
-	pkgver = 0.1.1
+	pkgver = 0.1.2
 	pkgrel = 1
 	url = https://github.com/vuluru/talon
 	arch = x86_64
@@ -8,10 +8,10 @@ pkgbase = talon
 	depends = webkit2gtk-4.1
 	depends = gtk3
 	depends = cairo
-	source = talon-0.1.1::https://github.com/vuluru/talon/releases/download/v0.1.1/talon-0.1.1-linux-x86_64.tar.gz
+	source = talon-0.1.2::https://github.com/vuluru/talon/releases/download/v0.1.2/talon-0.1.2-linux-x86_64.tar.gz
 	source = talon.desktop
 	source = talon.png
-	sha256sums = 15d116e28dfa79bc4eace135738122c864b6afba62945a78382520439cbd6dec
+	sha256sums = d5892b558d20d93ce5470fdca71d64b4bd88a02d579eb6a470b802e985375d24
 	sha256sums = ed45025ebe0975062436077de0ed05dafe73099c01535053d1eee44afeb8169b
 	sha256sums = b1c90b664bc2f0a3cfc2b9e11558ac188fae9311ebc7e02b36cd3303bbeda4aa
 
