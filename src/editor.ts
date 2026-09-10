@@ -4,6 +4,16 @@ import { markdown } from '@codemirror/lang-markdown';
 import { defaultKeymap } from '@codemirror/commands';
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { history, historyKeymap } from '@codemirror/commands';
+import { 
+  search, 
+  openSearchPanel, 
+  closeSearchPanel, 
+  findNext, 
+  findPrevious,
+  setSearchQuery,
+  SearchQuery,
+  getSearchQuery
+} from '@codemirror/search';
 
 export class Editor {
   private view: EditorView;
@@ -19,6 +29,11 @@ export class Editor {
         syntaxHighlighting(defaultHighlightStyle),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.lineWrapping,
+        search({
+          createPanel: () => {
+            return { dom: document.createElement('div'), top: true };
+          },
+        }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged && this.onChangeCallback) {
             this.onChangeCallback(this.getContent());
@@ -140,5 +155,78 @@ export class Editor {
     const bottom = Math.max(fromCoords.bottom, toCoords.bottom);
 
     return new DOMRect(left, top, right - left, bottom - top);
+  }
+
+  openFind(): void {
+    openSearchPanel(this.view);
+  }
+
+  closeFind(): void {
+    closeSearchPanel(this.view);
+  }
+
+  findNext(): void {
+    findNext(this.view);
+  }
+
+  findPrevious(): void {
+    findPrevious(this.view);
+  }
+
+  setFindQuery(query: string): void {
+    const searchQuery = new SearchQuery({
+      search: query,
+      caseSensitive: false,
+      regexp: false,
+      wholeWord: false,
+    });
+    this.view.dispatch({ effects: setSearchQuery.of(searchQuery) });
+  }
+
+  getFindQuery(): string {
+    const query = getSearchQuery(this.view.state);
+    return query.search;
+  }
+
+  getMatchCount(): { current: number; total: number } | null {
+    const query = getSearchQuery(this.view.state);
+    if (!query.search) {
+      return null;
+    }
+
+    const content = this.getContent();
+    const searchText = query.search;
+    
+    if (searchText.length === 0) {
+      return null;
+    }
+
+    const matches: number[] = [];
+    let index = 0;
+    const lowerContent = query.caseSensitive ? content : content.toLowerCase();
+    const lowerSearch = query.caseSensitive ? searchText : searchText.toLowerCase();
+
+    while ((index = lowerContent.indexOf(lowerSearch, index)) !== -1) {
+      matches.push(index);
+      index += searchText.length;
+    }
+
+    if (matches.length === 0) {
+      return null;
+    }
+
+    const cursorPos = this.getCursorPosition();
+    let current = 1;
+    for (let i = 0; i < matches.length; i++) {
+      if (matches[i] >= cursorPos) {
+        current = i + 1;
+        break;
+      }
+      if (i === matches.length - 1) {
+        current = matches.length;
+      }
+    }
+
+    return { current, total: matches.length };
   }
 }

@@ -31,6 +31,7 @@ class TalonApp {
     this.setupKeyboardShortcuts();
     this.setupEditor();
     this.setupModals();
+    this.setupFindBar();
 
     // Focus editor
     this.editor.focus();
@@ -60,6 +61,7 @@ class TalonApp {
     document.getElementById('shortcut-new')!.textContent = `${modKey}+N`;
     document.getElementById('shortcut-open')!.textContent = `${modKey}+O`;
     document.getElementById('shortcut-save')!.textContent = `${modKey}+S`;
+    document.getElementById('shortcut-find')!.textContent = `${modKey}+F`;
     
     const isMac = navigator.platform.toLowerCase().includes('mac');
     document.getElementById('shortcut-saveas')!.textContent = isMac ? `${modKey}⇧S` : `${modKey}+Shift+S`;
@@ -123,6 +125,10 @@ class TalonApp {
           case 'j':
             e.preventDefault();
             this.aiSummon('rewrite');
+            break;
+          case 'f':
+            e.preventDefault();
+            this.openFind();
             break;
           case 'n':
             e.preventDefault();
@@ -240,6 +246,98 @@ class TalonApp {
         this.hideModal();
       }
     });
+  }
+
+  private setupFindBar(): void {
+    const findInput = document.getElementById('find-input') as HTMLInputElement;
+    const findPrevBtn = document.getElementById('find-prev')!;
+    const findNextBtn = document.getElementById('find-next')!;
+
+    // Handle input changes
+    findInput.addEventListener('input', () => {
+      const query = findInput.value;
+      this.editor.setFindQuery(query);
+      this.updateFindMatchCount();
+    });
+
+    // Handle Enter key for next
+    findInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.editor.findNext();
+        this.updateFindMatchCount();
+      } else if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        this.editor.findPrevious();
+        this.updateFindMatchCount();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        this.closeFind();
+      }
+    });
+
+    // Handle button clicks
+    findPrevBtn.addEventListener('click', () => {
+      this.editor.findPrevious();
+      this.updateFindMatchCount();
+    });
+
+    findNextBtn.addEventListener('click', () => {
+      this.editor.findNext();
+      this.updateFindMatchCount();
+    });
+  }
+
+  private openFind(): void {
+    const findBar = document.getElementById('find-bar')!;
+    const findInput = document.getElementById('find-input') as HTMLInputElement;
+    
+    // Show find bar
+    findBar.style.display = 'flex';
+    
+    // Open CodeMirror search panel (for highlighting)
+    this.editor.openFind();
+    
+    // Focus input and select all if there's a prior query
+    const currentQuery = this.editor.getFindQuery();
+    if (currentQuery) {
+      findInput.value = currentQuery;
+      findInput.select();
+    } else {
+      findInput.value = '';
+    }
+    
+    findInput.focus();
+    this.updateFindMatchCount();
+  }
+
+  private closeFind(): void {
+    const findBar = document.getElementById('find-bar')!;
+    
+    // Hide find bar
+    findBar.style.display = 'none';
+    
+    // Close CodeMirror search panel
+    this.editor.closeFind();
+    
+    // Return focus to editor
+    this.editor.focus();
+  }
+
+  private updateFindMatchCount(): void {
+    const findMatchCount = document.getElementById('find-match-count')!;
+    const matchInfo = this.editor.getMatchCount();
+    
+    if (matchInfo) {
+      findMatchCount.textContent = `${matchInfo.current} of ${matchInfo.total}`;
+    } else {
+      const query = this.editor.getFindQuery();
+      if (query && query.length > 0) {
+        findMatchCount.textContent = 'no matches';
+      } else {
+        findMatchCount.textContent = '';
+      }
+    }
   }
 
   private async newFile(): Promise<void> {

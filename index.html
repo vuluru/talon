@@ -12,6 +12,14 @@
         <span id="file-name">untitled.md</span>
       </div>
       
+      <div id="find-bar" style="display: none;">
+        <input type="text" id="find-input" placeholder="calm" />
+        <span id="find-match-count"></span>
+        <button id="find-prev" title="Previous (Shift+Enter)">◀</button>
+        <button id="find-next" title="Next (Enter)">▶</button>
+        <span id="find-hint">Esc · close</span>
+      </div>
+      
       <div id="main-container">
         <div id="editor-container">
           <div id="editor"></div>
@@ -111,6 +119,10 @@
             <div class="shortcut-row">
               <span class="shortcut-action">Dismiss</span>
               <span class="shortcut-keys">Esc</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-action">Find</span>
+              <span class="shortcut-keys" id="shortcut-find"></span>
             </div>
             <div class="shortcut-row">
               <span class="shortcut-action">Preview</span>
