@@ -31,6 +31,64 @@ body {
   color: #e0e0e0;
 }
 
+/* Find bar - thin strip under title */
+#find-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  font-size: 13px;
+}
+
+#find-input {
+  flex: 0 0 auto;
+  width: 200px;
+  padding: 4px 8px;
+  background: #2b2b2b;
+  border: 1px solid #4a4a4a;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+#find-input:focus {
+  outline: none;
+  border-color: #0066cc;
+}
+
+#find-match-count {
+  color: #999;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+#find-prev,
+#find-next {
+  padding: 3px 10px;
+  background: #2b2b2b;
+  border: 1px solid #4a4a4a;
+  color: #e0e0e0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+#find-prev:hover,
+#find-next:hover {
+  background: #3c3c3c;
+}
+
+#find-hint {
+  margin-left: auto;
+  color: #666;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+}
+
 /* Main container */
 #main-container {
   display: flex;
