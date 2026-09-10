@@ -110,14 +110,14 @@ Linux produces AppImage and .deb; macOS produces .app and .dmg; Windows produces
 Download the latest release from [GitHub Releases](https://github.com/vuluru/talon/releases):
 
 ```bash
-# Download v0.1.4 tarball (check Releases page for newer versions)
-curl -LO https://github.com/vuluru/talon/releases/download/v0.1.4/talon-0.1.4-linux-x86_64.tar.gz
+# Download v0.1.5 tarball (check Releases page for newer versions)
+curl -LO https://github.com/vuluru/talon/releases/download/v0.1.5/talon-0.1.5-linux-x86_64.tar.gz
 
 # Verify checksum (use sha256 from Release notes for newer versions)
-echo "3b79c8d63cf3d7ef37505464000e4978f6568ab14cee17ccd071f735051222ce  talon-0.1.4-linux-x86_64.tar.gz" | sha256sum -c
+echo "40639855268be1b95f90e99fe4779ce13d593360035bdb095c8c6e908d6c58bc  talon-0.1.5-linux-x86_64.tar.gz" | sha256sum -c
 
 # Extract
-tar xzf talon-0.1.4-linux-x86_64.tar.gz
+tar xzf talon-0.1.5-linux-x86_64.tar.gz
 
 # Install binary, desktop entry, and icon (requires sudo)
 sudo install -Dm755 talon /usr/local/bin/talon
